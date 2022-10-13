@@ -22,7 +22,6 @@ class MainView: View() {
         root.center = myList.root
         root.left = subjectList.root
         title = "Anywhere ToDo"
-
     }
 }
 
