@@ -8,7 +8,10 @@ import com.example.todo_desktop.app.NavigatorButtonViewCss
 import com.example.todo_desktop.app.Styles.Companion.defaultSpacing
 import com.example.todo_desktop.app.Styles.Companion.smallSpacing
 import javafx.geometry.Pos
+import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
+
+import javafx.scene.input.KeyEvent
 
 import org.kordamp.bootstrapfx.BootstrapFX
 
@@ -60,21 +63,35 @@ class listView : View("ToDo Content") {
         form {
             fieldset {
                 field("Enter your Todo") {
-                    textfield(input)
+                    textfield(input) {
+                        setOnKeyPressed {
+                            if (it.code.equals(KeyCode.ENTER)) {
+                                addToDo(records, input)
+                            }
+                        }
+                    }
                 }
 
                 button("Add New Todo") {
                     action {
-                        records.add(input.value)
-                        input.value = ""
+                        addToDo(records, input)
                     }
                     styleClass.setAll("btn","btn-danger")
                 }
             }
         }
 
+    }
 
+    override fun onDock() {
+        root.requestFocus()
+    }
 
+    fun addToDo(record : MutableList<String>, text : SimpleStringProperty) {
+        if (text.value == "") return
+
+        record.add(text.value)
+        text.value = ""
     }
 
 }
