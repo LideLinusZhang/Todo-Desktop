@@ -14,9 +14,15 @@ class SubjectListView : View("Subject List") {
             }
         }
         form {
-            fieldset("New Subject") {
+            fieldset {
                 field("Enter Subject Name") {
                     textfield(input)
+                }
+            }
+            button("Add New Todo") {
+                action {
+                    records.add(input.value)
+                    input.value = ""
                 }
             }
         }
