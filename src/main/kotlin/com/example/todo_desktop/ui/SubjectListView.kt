@@ -1,8 +1,7 @@
 package com.example.todo_desktop.ui
+import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos.CENTER
 import javafx.geometry.Pos.CENTER_RIGHT
-import javafx.geometry.Pos.CENTER_LEFT
-import javafx.beans.property.SimpleStringProperty
 import tornadofx.*
 
 // Class definition for the list of
@@ -19,6 +18,12 @@ class SubjectListView : View("Subject List") {
             }
         }
         listview(records) {
+            setPrefSize(160.0,500.0)
+            onDoubleClick {
+                println("double click")
+                val selectedIdx = selectionModel.selectedIndices
+                records.removeAt(selectedIdx[0])
+            }
             cellFormat {
                 text = it
             }
@@ -26,11 +31,11 @@ class SubjectListView : View("Subject List") {
         form {
             alignment = CENTER_RIGHT
             fieldset {
-                field("Enter Subject Name") {
+                field("Enter Subject Name:") {
                     textfield(input)
                 }
             }
-            button("Add New Todo") {
+            button("Add New Subject") {
                 action {
                     records.add(input.value)
                     input.value = ""
