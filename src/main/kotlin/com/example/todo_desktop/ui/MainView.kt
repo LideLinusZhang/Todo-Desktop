@@ -1,19 +1,16 @@
 package com.example.todo_desktop.ui
-import javafx.scene.Parent
 import javafx.scene.layout.BorderPane
 import tornadofx.*
-import java.awt.Button
-import java.awt.Label
 import javax.swing.text.html.ListView
 
 class MainView: View() {
-    //val listView: ListView by inject<ListView>()
+    //val ToDoListView: ToDoListView by inject<ToDoListView>()
 
     override val root : BorderPane by fxml("main_view.fxml")
 
     val toDoList : ListView by fxid("toDo_content_list")
 
-    val myList : listView by inject()
+    val myList : com.example.todo_desktop.ui.ToDoListView by inject()
 
     init {
         root.setPrefSize(1200.0, 720.0)

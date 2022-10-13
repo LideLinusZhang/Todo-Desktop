@@ -4,22 +4,20 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.scene.layout.HBox
 import tornadofx.*
 import com.example.todo_desktop.app.Styles
-import com.example.todo_desktop.app.NavigatorButtonViewCss
 import com.example.todo_desktop.app.Styles.Companion.defaultSpacing
 import com.example.todo_desktop.app.Styles.Companion.smallSpacing
+import com.example.todo_desktop.controller.ListController
 import javafx.geometry.Pos
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
 
-import javafx.scene.input.KeyEvent
-
-import org.kordamp.bootstrapfx.BootstrapFX
-
-class listView : View("ToDo Content") {
+class ToDoListView : View("ToDo Content") {
 
     private val records = mutableListOf<String>().observable()
 
     val input = SimpleStringProperty()
+
+    val listController : ListController by inject()
 
     override val root = vbox {
         stylesheets.add("org/kordamp/bootstrapfx/bootstrapfx.css")
@@ -44,18 +42,27 @@ class listView : View("ToDo Content") {
                         label("Tasks")
                     }
 
-                    hbox {
-                        button {
-                            addClass(Styles.icon, Styles.heartIcon)
-                        }
+                    if (isSelected) {
+                        // contain favorite and delete button
+                        hbox {
+                            button {
+                                addClass(Styles.icon, Styles.heartIcon)
+                            }
 
-                        addClass(defaultSpacing)
+                            addClass(defaultSpacing)
 
-                        button {
-                            addClass(Styles.icon, Styles.trashcanIcon)
+                            button {
+                                addClass(Styles.icon, Styles.trashcanIcon)
+
+                                action {
+                                    print(selectedItem)
+                                    deleteTodo(records, selectedItem)
+                                }
+                            }
+                            alignment = Pos.CENTER
                         }
-                        alignment = Pos.CENTER
                     }
+
                 }
             }
         }
@@ -87,11 +94,16 @@ class listView : View("ToDo Content") {
         root.requestFocus()
     }
 
-    fun addToDo(record : MutableList<String>, text : SimpleStringProperty) {
+    private fun addToDo(record : MutableList<String>, text : SimpleStringProperty) {
         if (text.value == "") return
 
         record.add(text.value)
         text.value = ""
+    }
+
+    private fun deleteTodo(record: MutableList<String>, selectedItem : String?) {
+        record.remove(selectedItem)
+        listController.deleteToDo(selectedItem)
     }
 
 }
