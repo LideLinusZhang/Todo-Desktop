@@ -15,60 +15,68 @@ class SubjectListView : View("Subject List") {
 
     val mToDoListView : ToDoListView by inject()
 
-    override val root = vbox {
+    override val root = hbox {
         vbox {
-            alignment = CENTER
-            label("SUBJECTS") {
-                style = "-fx-font: 20 arial;"
-                minWidth(50.0)
-                minHeight(50.0)
-            }
+            setPrefSize(10.0, 700.0)
         }
-        listview(subjects) {
-            setPrefSize(160.0, 500.0)
-
-            /*
-            onDoubleClick {
-                println("double click")
-                val selectedIdx = selectionModel.selectedIndices
-                subjects.removeAt(selectedIdx[0])
-            }
-
-            onUserSelect {
-                temp.records.add("Add item success")
-            }*/
-
-            onDoubleClick {
-                println("double click on subject list")
-                // First check if the user is clicking the current subject:
-
-                // Not clicking current branch -->
-                // Call CLI & search for tasks (with selectedItem as parameter)
-
-                // Delete all tasks in current list.
-                mToDoListView.records.removeAll(mToDoListView.records)
-
-                // Refill content from database's result
-                mToDoListView.records.add("add1")
-            }
-
-            cellFormat {
-                text = it
-            }
-        }
-        form {
-            alignment = CENTER_RIGHT
-            fieldset {
-                field("Enter Subject Name:") {
-                    textfield(input)
+        vbox {
+            vbox {
+                alignment = CENTER
+                label("SUBJECTS") {
+                    style = "-fx-font: 20 arial;"
+                    minWidth(50.0)
+                    minHeight(50.0)
                 }
             }
-            button("Add New Subject") {
-                action {
-                    subjects.add(input.value)
-                    input.value = ""
+            listview(subjects) {
+                setPrefSize(160.0, 500.0)
+
+                /*
+                onDoubleClick {
+                    println("double click")
+                    val selectedIdx = selectionModel.selectedIndices
+                    subjects.removeAt(selectedIdx[0])
+                }
+
+                onUserSelect {
+                    temp.records.add("Add item success")
+                }*/
+
+                onDoubleClick {
+                    println("double click on subject list")
+                    // First check if the user is clicking the current subject:
+
+                    // Not clicking current branch -->
+                    // Call CLI & search for tasks (with selectedItem as parameter)
+
+                    // Delete all tasks in current list.
+                    mToDoListView.records.removeAll(mToDoListView.records)
+
+                    // Refill content from database's result
+                    mToDoListView.records.add("add1")
+                }
+
+                cellFormat {
+                    text = it
                 }
             }
+            form {
+                alignment = CENTER_RIGHT
+                fieldset {
+                    field("Enter Subject Name:") {
+                        textfield(input)
+                    }
+                }
+                button("Add New Subject") {
+                    action {
+                        subjects.add(input.value)
+                        input.value = ""
+                    }
+                }
+            }
+        }
+        vbox {
+            setPrefSize(15.0, 700.0)
         }
     }
     init {
