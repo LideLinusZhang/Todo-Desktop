@@ -13,7 +13,7 @@ import javafx.scene.layout.Priority
 
 class ToDoListView : View("ToDo Content") {
 
-    private val records = mutableListOf<String>().observable()
+    public val records = mutableListOf<String>().observable()
 
     val input = SimpleStringProperty()
 
