@@ -12,11 +12,13 @@ class MainView: View() {
 
     val myList : com.example.todo_desktop.ui.ToDoListView by inject()
 
+    val subjectList : SubjectListView by inject()
+
     init {
         root.setPrefSize(1200.0, 720.0)
         root.center = myList.root
+        root.left = subjectList.root
         title = "Anywhere ToDo"
-
     }
 }
 
