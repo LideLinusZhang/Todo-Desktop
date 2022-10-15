@@ -7,3 +7,5 @@
 [Github Example (video)](https://www.youtube.com/watch?v=fbotMfyGoKA)
 
 [TornadoFX Documentation](https://docs.tornadofx.io/)
+
+[Exposed Guide](https://github.com/JetBrains/Exposed)
