@@ -96,10 +96,16 @@ class ToDoListView : View("ToDo Content") {
                             }
                             alignment = Pos.CENTER
                         }
-                    }
 
+                    }
                 }
             }
+            // when delete key is hit, delete the current ToDo
+            setOnKeyPressed {
+                    if (it.code.equals(KeyCode.BACK_SPACE))
+                        deleteTodo(records,selectedItem)
+            }
+
         }
 
         form {
@@ -112,9 +118,8 @@ class ToDoListView : View("ToDo Content") {
                         setOnMouseClicked { text = "" }
 
                         setOnKeyPressed {
-                            if (it.code.equals(KeyCode.ENTER)) {
+                            if (it.code.equals(KeyCode.ENTER))
                                 addToDo(records, input)
-                            }
                         }
                     }
                 }
