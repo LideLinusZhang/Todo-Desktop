@@ -102,8 +102,27 @@ class ToDoListView : View("ToDo Content") {
             }
             // when delete key is hit, delete the current ToDo
             setOnKeyPressed {
-                    if (it.code.equals(KeyCode.BACK_SPACE))
-                        deleteTodo(records,selectedItem)
+                if (it.code.equals(KeyCode.BACK_SPACE)) {
+                    deleteTodo(records, selectedItem)
+                } else if (it.code.equals(KeyCode.W)) {
+                    println("W key pressed on item list")
+                    val selectedIdx = selectionModel.selectedIndices[0]
+                    if (selectedIdx != 0) {
+                        val tmpString = records[selectedIdx - 1]
+                        records.removeAt(selectedIdx - 1)
+                        records.add(selectedIdx, tmpString)
+                        println("Item switched up")
+                    }
+                } else if (it.code.equals(KeyCode.S)) {
+                    println("S key pressed on item list")
+                    val selectedIdx = selectionModel.selectedIndices[0]
+                    if (selectedIdx != records.size-1) {
+                        val tmpString = records[selectedIdx + 1]
+                        records.add(selectedIdx, tmpString)
+                        records.removeAt(selectedIdx + 2)
+                        println("Item switched down")
+                    }
+                }
             }
 
         }
