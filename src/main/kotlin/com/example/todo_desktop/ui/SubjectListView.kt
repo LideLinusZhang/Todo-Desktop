@@ -7,6 +7,7 @@ import javafx.geometry.Pos.CENTER_RIGHT
 import tornadofx.*
 import com.example.todo_desktop.ui.ToDoListView
 import javafx.geometry.Pos
+import javafx.scene.input.KeyCode
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 
@@ -60,6 +61,27 @@ class SubjectListView : View("Subject List") {
                     mToDoListView.records.add("add1")
                 }
 
+                setOnKeyPressed {
+                    if (it.code.equals(KeyCode.W)) {
+                        println("W key pressed on subject list")
+                        val selectedIdx = selectionModel.selectedIndices[0]
+                        if (selectedIdx != 0) {
+                            val tmpString = subjects[selectedIdx - 1]
+                            subjects.removeAt(selectedIdx - 1)
+                            subjects.add(selectedIdx, tmpString)
+                            println("Item switched up")
+                        }
+                    } else if (it.code.equals(KeyCode.S)) {
+                        println("S key pressed on subject list")
+                        val selectedIdx = selectionModel.selectedIndices[0]
+                        if (selectedIdx != subjects.size-1) {
+                            val tmpString = subjects[selectedIdx + 1]
+                            subjects.add(selectedIdx, tmpString)
+                            subjects.removeAt(selectedIdx + 2)
+                            println("Item switched down")
+                        }
+                    }
+                }
                 cellFormat {
                     graphic = HBox().apply {
                         addClass(Styles.defaultSpacing)
@@ -78,6 +100,7 @@ class SubjectListView : View("Subject List") {
                             }
                         }
                     }
+
                 }
             }
             form {
