@@ -86,10 +86,14 @@ class SubjectListView : View("Subject List") {
                     graphic = HBox().apply {
                         addClass(Styles.defaultSpacing)
                         label(it) {
-                            setPrefWidth(260.0)
+                            setPrefWidth(235.0)
                         }
                         if (isSelected) {
                             hbox {
+                                button {
+                                    addClass(Styles.icon, Styles.heartIcon)
+                                }
+                                addClass(Styles.defaultSpacing)
                                 button {
                                     addClass(Styles.icon, Styles.trashcanIcon)
                                     action {
