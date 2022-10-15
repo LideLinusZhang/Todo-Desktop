@@ -1,10 +1,14 @@
 package com.example.todo_desktop.ui
+import com.example.todo_desktop.app.Styles
 import com.example.todo_desktop.controller.ListController
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos.CENTER
 import javafx.geometry.Pos.CENTER_RIGHT
 import tornadofx.*
 import com.example.todo_desktop.ui.ToDoListView
+import javafx.geometry.Pos
+import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
 
 // Class definition for the list of
 class SubjectListView : View("Subject List") {
@@ -57,7 +61,23 @@ class SubjectListView : View("Subject List") {
                 }
 
                 cellFormat {
-                    text = it
+                    graphic = HBox().apply {
+                        addClass(Styles.defaultSpacing)
+                        label(it) {
+                            setPrefWidth(260.0)
+                        }
+                        if (isSelected) {
+                            hbox {
+                                button {
+                                    addClass(Styles.icon, Styles.trashcanIcon)
+                                    action {
+                                        subjects.remove(selectedItem)
+                                    }
+                                }
+                                alignment = Pos.CENTER
+                            }
+                        }
+                    }
                 }
             }
             form {
