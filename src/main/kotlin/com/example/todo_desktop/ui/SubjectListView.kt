@@ -131,6 +131,7 @@ class SubjectListView : View("Subject List") {
                         textfield(input)
                     }
                 }
+                // Button to insert a new subject (with default fav value)
                 button("Add New Subject") {
                     action {
                         subjects.add(input.value)
