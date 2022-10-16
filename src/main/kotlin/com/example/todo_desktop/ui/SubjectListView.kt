@@ -14,6 +14,7 @@ import javafx.scene.layout.Priority
 // Class definition for the list of
 class SubjectListView : View("Subject List") {
     private var subjects = mutableListOf<String>().observable()
+    private var favorites = mutableListOf<Boolean>().observable()
     val input = SimpleStringProperty()
     val curSubjectIndex = 0;
     val listController : ListController by inject()
@@ -67,8 +68,11 @@ class SubjectListView : View("Subject List") {
                         val selectedIdx = selectionModel.selectedIndices[0]
                         if (selectedIdx != 0) {
                             val tmpString = subjects[selectedIdx - 1]
+                            val tmpBool = favorites[selectedIdx - 1]
                             subjects.removeAt(selectedIdx - 1)
+                            favorites.removeAt(selectedIdx - 1)
                             subjects.add(selectedIdx, tmpString)
+                            favorites.add(selectedIdx, tmpBool)
                             println("Item switched up")
                         }
                     } else if (it.code.equals(KeyCode.S)) {
@@ -86,10 +90,31 @@ class SubjectListView : View("Subject List") {
                     graphic = HBox().apply {
                         addClass(Styles.defaultSpacing)
                         label(it) {
-                            setPrefWidth(260.0)
+                            setPrefWidth(235.0)
                         }
                         if (isSelected) {
+                            val selectedIdx = selectionModel.selectedIndices[0]
+                            val tmpString = subjects[selectedIdx]
                             hbox {
+                                button {
+                                    if (favorites[selectedIdx]) {
+                                        addClass(Styles.icon, Styles.filledHeartIcon)
+                                        action {
+                                            subjects.removeAt(selectedIdx)
+                                            subjects.add(selectedIdx, tmpString)
+                                            favorites[selectedIdx] = false
+                                        }
+                                    } else {
+                                        addClass  (Styles.icon, Styles.heartIcon)
+                                        action {
+                                            subjects.removeAt(selectedIdx)
+                                            subjects.add(selectedIdx, tmpString)
+                                            addClass (Styles.icon, Styles.filledHeartIcon)
+                                            favorites[selectedIdx] = true
+                                        }
+                                    }
+                                }
+                                addClass(Styles.defaultSpacing)
                                 button {
                                     addClass(Styles.icon, Styles.trashcanIcon)
                                     action {
@@ -113,6 +138,7 @@ class SubjectListView : View("Subject List") {
                 button("Add New Subject") {
                     action {
                         subjects.add(input.value)
+                        favorites.add(false)
                         input.value = ""
                     }
                 }
@@ -126,5 +152,8 @@ class SubjectListView : View("Subject List") {
         subjects.add("CS 346")
         subjects.add("CS 446")
         subjects.add("CS 348")
+        favorites.add(true)
+        favorites.add(true)
+        favorites.add(true)
     }
 }
