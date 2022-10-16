@@ -23,16 +23,6 @@ class MainView: View() {
 
     init {
         root.setPrefSize(1200.0, 720.0)
-        /*
-        if (osName.startsWith("Mac")) {
-
-        } else {
-            MenuBar() {
-                Menu("menu1")
-            }
-        }
-
-         */
         root.top = headerView.root
         root.center = myList.root
         root.left = subjectList.root
