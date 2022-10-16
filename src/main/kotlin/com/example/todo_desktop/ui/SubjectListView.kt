@@ -16,16 +16,16 @@ class SubjectListView : View("Subject List") {
     private var subjects = mutableListOf<String>().observable()
     private var favorites = mutableListOf<Boolean>().observable()
     val input = SimpleStringProperty()
-    val curSubjectIndex = 0;
-    val listController : ListController by inject()
 
     val mToDoListView : ToDoListView by inject()
 
     override val root = hbox {
+        // Space holder
         vbox {
             setPrefSize(10.0, 700.0)
         }
         vbox {
+            // Header for the list of subjects
             vbox {
                 alignment = CENTER
                 label("SUBJECTS") {
@@ -34,20 +34,9 @@ class SubjectListView : View("Subject List") {
                     minHeight(50.0)
                 }
             }
+            // The actual list of subjects
             listview(subjects) {
                 setPrefSize(160.0, 500.0)
-
-                /*
-                onDoubleClick {
-                    println("double click")
-                    val selectedIdx = selectionModel.selectedIndices
-                    subjects.removeAt(selectedIdx[0])
-                }
-
-                onUserSelect {
-                    temp.records.add("Add item success")
-                }*/
-
                 onDoubleClick {
                     println("double click on subject list")
                     // First check if the user is clicking the current subject:
@@ -63,9 +52,11 @@ class SubjectListView : View("Subject List") {
                 }
 
                 setOnKeyPressed {
+                    // Selected + pressing W --> Move subject up by 1
                     if (it.code.equals(KeyCode.W)) {
                         println("W key pressed on subject list")
                         val selectedIdx = selectionModel.selectedIndices[0]
+                        // If user is not trying to move up the first subject
                         if (selectedIdx != 0) {
                             val tmpString = subjects[selectedIdx - 1]
                             val tmpBool = favorites[selectedIdx - 1]
@@ -75,6 +66,7 @@ class SubjectListView : View("Subject List") {
                             favorites.add(selectedIdx, tmpBool)
                             println("Item switched up")
                         }
+                    // Selected + pressing S --> Move subject down by 1
                     } else if (it.code.equals(KeyCode.S)) {
                         println("S key pressed on subject list")
                         val selectedIdx = selectionModel.selectedIndices[0]
@@ -92,11 +84,13 @@ class SubjectListView : View("Subject List") {
                         label(it) {
                             setPrefWidth(235.0)
                         }
+                        // Conditions for button clicks on the cell
                         if (isSelected) {
                             val selectedIdx = selectionModel.selectedIndices[0]
                             val tmpString = subjects[selectedIdx]
                             hbox {
                                 button {
+                                    // If the selected cell is favorited.
                                     if (favorites[selectedIdx]) {
                                         addClass(Styles.icon, Styles.filledHeartIcon)
                                         action {
@@ -104,6 +98,7 @@ class SubjectListView : View("Subject List") {
                                             subjects.add(selectedIdx, tmpString)
                                             favorites[selectedIdx] = false
                                         }
+                                    // If the selected cell is not favorited.
                                     } else {
                                         addClass  (Styles.icon, Styles.heartIcon)
                                         action {
@@ -115,6 +110,7 @@ class SubjectListView : View("Subject List") {
                                     }
                                 }
                                 addClass(Styles.defaultSpacing)
+                                // Show delete button
                                 button {
                                     addClass(Styles.icon, Styles.trashcanIcon)
                                     action {
@@ -125,9 +121,9 @@ class SubjectListView : View("Subject List") {
                             }
                         }
                     }
-
                 }
             }
+            // Form for add a new subject to the list
             form {
                 alignment = CENTER_RIGHT
                 fieldset {
@@ -148,6 +144,7 @@ class SubjectListView : View("Subject List") {
             setPrefSize(15.0, 700.0)
         }
     }
+    // Some sample data
     init {
         subjects.add("CS 346")
         subjects.add("CS 446")
