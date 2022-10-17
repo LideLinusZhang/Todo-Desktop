@@ -97,6 +97,7 @@ class SubjectListView : View("Subject List") {
                                             subjects.removeAt(selectedIdx)
                                             subjects.add(selectedIdx, tmpString)
                                             favorites[selectedIdx] = false
+                                            selectionModel.select(subjects[selectedIdx])
                                         }
                                     // If the selected cell is not favorited.
                                     } else {
@@ -106,6 +107,7 @@ class SubjectListView : View("Subject List") {
                                             subjects.add(selectedIdx, tmpString)
                                             addClass (Styles.icon, Styles.filledHeartIcon)
                                             favorites[selectedIdx] = true
+                                            selectionModel.select(subjects[selectedIdx])
                                         }
                                     }
                                 }
