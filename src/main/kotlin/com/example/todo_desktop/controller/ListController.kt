@@ -2,9 +2,7 @@ package com.example.todo_desktop.controller
 
 import com.example.todo_desktop.app.Styles
 import com.example.todo_desktop.common.constant
-import com.example.todo_desktop.data.ToDo
 import com.example.todo_desktop.data.ToDoInfo
-import javafx.scene.layout.Priority
 import tornadofx.*
 import java.text.SimpleDateFormat
 import java.time.LocalDate

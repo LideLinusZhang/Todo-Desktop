@@ -1,9 +1,9 @@
 plugins {
     id 'java'
     id 'application'
-    id 'org.jetbrains.kotlin.jvm' version '1.7.20'
-    id 'org.openjfx.javafxplugin' version '0.0.10'
-    id 'org.beryx.jlink' version '2.24.1'
+    id 'org.jetbrains.kotlin.jvm' version '1.6.20'
+    id 'org.openjfx.javafxplugin' version '0.0.13'
+    id 'org.beryx.jlink' version '2.25.0'
 }
 
 group 'com.example'
@@ -14,7 +14,7 @@ repositories {
 }
 
 ext {
-    junitVersion = '5.8.1'
+    junitVersion = '5.8.2'
 }
 
 sourceCompatibility = '18'
@@ -25,44 +25,25 @@ tasks.withType(JavaCompile) {
 }
 
 application {
-    mainModule = 'com.example.todo_desktop'
+    mainModule = 'com.example.todo_desktop.ui'
     mainClass = 'com.example.todo_desktop.ui.MainApp'
 }
 
 [compileKotlin, compileTestKotlin].forEach {
     it.kotlinOptions {
-        jvmTarget = '18'
+        jvmTarget = '11'
     }
 }
 
 javafx {
-    version = '11.0.2'
-    modules = ['javafx.controls', 'javafx.fxml']
+    version = '18.0.2'
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.graphics']
 }
 
 dependencies {
     implementation('org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0')
     implementation('no.tornado:tornadofx:1.7.20')
     implementation ('org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0')
-
-    implementation("org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final")
-
-    implementation("org.clojure:java.jdbc:0.7.12")
-    implementation('org.hibernate:hibernate-core:6.1.4.Final')
-    implementation("mysql:mysql-connector-java:8.0.30")
-
-
-    implementation("org.jetbrains.exposed:exposed-core:0.40.1")
-    implementation("org.jetbrains.exposed:exposed-dao:0.40.1")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.40.1")
-    implementation("com.h2database:h2:2.1.214")
-
-
-    //MySQL
-    implementation("mysql:mysql-connector-java:8.0.19")
-    implementation("com.zaxxer:HikariCP:5.0.1")
-    implementation("org.slf4j:slf4j-api:2.0.3")
-    implementation("org.slf4j:slf4j-simple:2.0.3")
 
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
