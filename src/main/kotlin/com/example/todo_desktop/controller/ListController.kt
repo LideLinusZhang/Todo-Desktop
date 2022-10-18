@@ -1,6 +1,8 @@
 package com.example.todo_desktop.controller
 
 import com.example.todo_desktop.common.constant
+import com.example.todo_desktop.data.ToDoInfo
+import javafx.scene.layout.Priority
 import tornadofx.*
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -8,11 +10,22 @@ import java.util.Date
 import java.time.format.DateTimeFormatter
 
 class ListController : Controller() {
+    var sortOption = constant.SORT_BY_DEFAULT
 
     var currDueDate : LocalDate = LocalDate.now()
 
-    fun deleteToDo(text : String?) {
+    var currPriority : Int = 3
 
+    fun deleteToDo(item : ToDoInfo?) {
+
+    }
+
+    fun addToDo(records: MutableList<ToDoInfo>) {
+        triggerSortOption(records)
+    }
+
+    fun setPriority(prio : String) {
+        currPriority = priorityToInt(prio)
     }
 
     fun TodayInfo(): String {
@@ -33,5 +46,51 @@ class ListController : Controller() {
         println("currDueDate ${currDueDate.toString()}");
     }
 
+    fun DateToString(date : LocalDate?) : String {
+        val formatter : DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        return when (date) {
+            LocalDate.now() -> "Today"
+            LocalDate.now().plusDays(1) -> "Tomorrow"
+            else -> date.toString()
+        }
+    }
+
+    fun priorityToInt(priority: String) : Int {
+        return when (priority) {
+            constant.PRIORITY_CRITICAL -> 1
+            constant.PRIORITY_HIGH -> 2
+            constant.PRIORITY_MEDIUM -> 3
+            constant.PRIORITY_LOW -> 4
+            else -> 5
+        }
+    }
+
+    fun IntToPrioiry(value : Int) : String {
+        return when (value) {
+            1 -> constant.PRIORITY_CRITICAL
+            2 -> constant.PRIORITY_HIGH
+            3 -> constant.PRIORITY_MEDIUM
+            4 -> constant.PRIORITY_LOW
+            else -> constant.PRIORITY_VERY_LOW
+        }
+    }
+
+    fun sortByPriority(records : MutableList<ToDoInfo>) {
+        records.sortBy { it.priority }
+    }
+
+    fun sortByDueDate(records: MutableList<ToDoInfo>) {
+        records.sortBy { it.dueDate }
+    }
+
+    fun sortByDefault(records: MutableList<ToDoInfo>) { }
+
+    fun triggerSortOption(records: MutableList<ToDoInfo>) {
+        when (sortOption) {
+            constant.SORT_BY_PRIORITY -> sortByPriority(records)
+            constant.SORT_BY_DUE_DATE -> sortByDueDate(records)
+            constant.SORT_BY_DEFAULT -> sortByDefault(records)
+        }
+    }
 
 }
