@@ -88,7 +88,9 @@ class ListController : Controller() {
     fun sortByDefault(records: MutableList<ToDoInfo>) { }
 
     fun sortByStar(records: MutableList<ToDoInfo>) {
-        records.sortBy { it.isStared }
+        records.sortByDescending {
+            it.isStared
+        }
     }
 
     fun triggerSortOption(records: MutableList<ToDoInfo>) {
