@@ -10,7 +10,6 @@ import com.example.todo_desktop.app.Styles.Companion.smallSpacing
 import com.example.todo_desktop.app.Styles.Companion.smallText
 import com.example.todo_desktop.common.constant
 import com.example.todo_desktop.controller.ListController
-import com.example.todo_desktop.data.ToDo
 import com.example.todo_desktop.data.ToDoInfo
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections

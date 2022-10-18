@@ -9,7 +9,9 @@ import javafx.scene.control.MenuItem;
 class MainView: View() {
     //val ToDoListView: ToDoListView by inject<ToDoListView>()
 
-    override val root : BorderPane by fxml("main_view.fxml")
+    val a = javaClass.getResourceAsStream("main_view.fxml")
+
+    override val root : BorderPane by fxml(a)
 
     val toDoList : ListView by fxid("toDo_content_list")
 
