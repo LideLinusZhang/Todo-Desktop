@@ -1,6 +1,7 @@
 package com.example.todo_desktop.ui
 import com.example.todo_desktop.app.Styles
 import com.example.todo_desktop.controller.ListController
+import com.example.todo_desktop.data.ToDoInfo
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos.CENTER
 import javafx.geometry.Pos.CENTER_RIGHT
@@ -48,7 +49,7 @@ class SubjectListView : View("Subject List") {
                     mToDoListView.records.removeAll(mToDoListView.records)
 
                     // Refill content from database's result
-                    mToDoListView.records.add("add1")
+                    mToDoListView.records.add(ToDoInfo("add1"))
                 }
 
                 setOnKeyPressed {

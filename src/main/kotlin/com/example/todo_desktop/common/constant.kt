@@ -16,6 +16,23 @@ class constant {
 
         val DB_CONFIG = dbConfig(DB_URL, DB_TYPE, DB_USER_NAME, DB_PASSWORD)
 
+        // priority
+        val PRIORITY_CRITICAL = "Critical"
+        val PRIORITY_HIGH = "High"
+        val PRIORITY_MEDIUM = "Medium"
+        val PRIORITY_LOW = "Low"
+        val PRIORITY_VERY_LOW = "Very Low"
+
+        // sort option
+        val SORT_BY_DEFAULT = "Default"
+        val SORT_BY_PRIORITY = "Priority"
+        val SORT_BY_DUE_DATE = "Due Date"
+
+        // sort option index
+        val SORT_DEFAULT_INDEX = 0
+        val SORT_PRIORITY_INDEX = 1
+        val SORT_DUE_INDEX = 2
+
     }
 }
 
