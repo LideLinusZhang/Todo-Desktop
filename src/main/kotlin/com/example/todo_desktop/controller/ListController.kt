@@ -1,6 +1,8 @@
 package com.example.todo_desktop.controller
 
+import com.example.todo_desktop.app.Styles
 import com.example.todo_desktop.common.constant
+import com.example.todo_desktop.data.ToDo
 import com.example.todo_desktop.data.ToDoInfo
 import javafx.scene.layout.Priority
 import tornadofx.*
@@ -16,8 +18,8 @@ class ListController : Controller() {
 
     var currPriority : Int = 3
 
-    fun deleteToDo(item : ToDoInfo?) {
-
+    fun deleteToDo(item : ToDoInfo?, records: MutableList<ToDoInfo>) {
+        triggerSortOption(records)
     }
 
     fun addToDo(records: MutableList<ToDoInfo>) {
@@ -85,12 +87,27 @@ class ListController : Controller() {
 
     fun sortByDefault(records: MutableList<ToDoInfo>) { }
 
+    fun sortByStar(records: MutableList<ToDoInfo>) {
+        records.sortBy { it.isStared }
+    }
+
     fun triggerSortOption(records: MutableList<ToDoInfo>) {
         when (sortOption) {
             constant.SORT_BY_PRIORITY -> sortByPriority(records)
             constant.SORT_BY_DUE_DATE -> sortByDueDate(records)
             constant.SORT_BY_DEFAULT -> sortByDefault(records)
+            constant.SORT_BY_STAR -> sortByStar(records)
+        }
+    }
+    fun getStarStyle(todo : ToDoInfo): CssRule {
+        return when(todo.isStared) {
+            true -> Styles.redHeartIcon
+            false -> Styles.heartIcon
         }
     }
 
+    fun changeStarStatus(todo : ToDoInfo) : CssRule{
+        todo.isStared = !todo.isStared
+        return getStarStyle(todo)
+    }
 }

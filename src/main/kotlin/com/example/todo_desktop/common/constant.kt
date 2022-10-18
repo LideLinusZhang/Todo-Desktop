@@ -27,11 +27,13 @@ class constant {
         val SORT_BY_DEFAULT = "Default"
         val SORT_BY_PRIORITY = "Priority"
         val SORT_BY_DUE_DATE = "Due Date"
+        val SORT_BY_STAR = "Starred"
 
         // sort option index
         val SORT_DEFAULT_INDEX = 0
         val SORT_PRIORITY_INDEX = 1
         val SORT_DUE_INDEX = 2
+        val SORT_STAT = 3
 
     }
 }

@@ -10,6 +10,7 @@ import com.example.todo_desktop.app.Styles.Companion.smallSpacing
 import com.example.todo_desktop.app.Styles.Companion.smallText
 import com.example.todo_desktop.common.constant
 import com.example.todo_desktop.controller.ListController
+import com.example.todo_desktop.data.ToDo
 import com.example.todo_desktop.data.ToDoInfo
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
@@ -21,6 +22,7 @@ import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
 import java.awt.TextField
 import java.time.LocalDate
+import javax.swing.text.Style
 
 class ToDoListView : View("ToDo Content") {
 
@@ -38,7 +40,8 @@ class ToDoListView : View("ToDo Content") {
         FXCollections.observableArrayList(
             constant.SORT_BY_DEFAULT,
             constant.SORT_BY_PRIORITY,
-            constant.SORT_BY_DUE_DATE)
+            constant.SORT_BY_DUE_DATE,
+            constant.SORT_BY_STAR)
 
     private var selectedDue = SimpleStringProperty()
     private var selectedPri = SimpleStringProperty()
@@ -138,7 +141,15 @@ class ToDoListView : View("ToDo Content") {
                         // contain favorite and delete button
                         hbox {
                             button {
-                                addClass(Styles.icon, Styles.heartIcon)
+                                var heartStyle = listController.getStarStyle(it)
+                                addClass(Styles.icon, heartStyle)
+                                action {
+                                    heartStyle = listController.changeStarStatus(it)
+                                    addClass(Styles.icon, heartStyle)
+                                    selectionModel.clearSelection()
+                                    selectionModel.select(it)
+                                    listController.triggerSortOption(records)
+                                }
                             }
 
                             addClass(defaultSpacing)
@@ -276,7 +287,7 @@ class ToDoListView : View("ToDo Content") {
 
     private fun deleteTodo(record: MutableList<ToDoInfo>, selectedItem : ToDoInfo?) {
         record.remove(selectedItem)
-        listController.deleteToDo(selectedItem)
+        listController.deleteToDo(selectedItem, records)
     }
 
     private fun setPickDate(text : String, list : ObservableList<String>) {
