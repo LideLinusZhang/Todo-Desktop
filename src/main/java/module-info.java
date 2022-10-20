@@ -12,4 +12,5 @@ module com.example.todo_desktop.ui {
     exports com.example.todo_desktop.common;
     exports com.example.todo_desktop.app;
     exports com.example.todo_desktop.data;
+    exports com.example.todo_desktop.service;
 }
