@@ -9,3 +9,5 @@
 [TornadoFX Documentation](https://docs.tornadofx.io/)
 
 [Exposed Guide](https://github.com/JetBrains/Exposed)
+
+[Microsoft Graph](https://developer.microsoft.com/en-us/graph/graph-explorer)
