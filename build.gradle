@@ -11,6 +11,17 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    maven {
+        url("https://git.uwaterloo.ca/api/v4/projects/69446/packages/maven")
+        name "GitLab"
+        credentials(HttpHeaderCredentials) {
+            name = 'Deploy-Token'
+            value = 'KtqpZE3e2fURjpqgd7BG'
+        }
+        authentication {
+            header(HttpHeaderAuthentication)
+        }
+    }
 }
 
 ext {
@@ -43,7 +54,8 @@ javafx {
 dependencies {
     implementation('org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0')
     implementation('no.tornado:tornadofx:1.7.20')
-    implementation ('org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0')
+    implementation('org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0')
+    implementation "edu.uwaterloo.cs:todo-lib:1.0.0.12-DEV"
 
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
