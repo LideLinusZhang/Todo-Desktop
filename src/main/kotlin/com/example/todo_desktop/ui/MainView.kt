@@ -21,8 +21,6 @@ class MainView: View() {
 
     val headerView : HeaderView by inject()
 
-
-
     init {
         root.setPrefSize(1200.0, 720.0)
         root.top = headerView.root
