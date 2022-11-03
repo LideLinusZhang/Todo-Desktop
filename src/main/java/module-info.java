@@ -4,7 +4,13 @@ module com.example.todo_desktop.ui {
     requires javafx.controls;
     requires kotlin.stdlib;
     requires java.desktop;
+    requires java.base;
     requires tornadofx;
+    requires todo.lib.jvm;
+    requires kotlinx.serialization.json;
+    requires kotlin.reflect;
+    requires kotlinx.datetime;
+    requires jdk.jpackage;
 
     opens com.example.todo_desktop.ui;
     exports com.example.todo_desktop.ui;

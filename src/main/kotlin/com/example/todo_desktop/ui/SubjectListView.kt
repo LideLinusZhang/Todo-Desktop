@@ -1,43 +1,71 @@
 package com.example.todo_desktop.ui
 import com.example.todo_desktop.app.Styles
-import com.example.todo_desktop.controller.ListController
 import com.example.todo_desktop.data.ToDoInfo
 import javafx.beans.property.SimpleStringProperty
+import javafx.geometry.Pos
 import javafx.geometry.Pos.CENTER
 import javafx.geometry.Pos.CENTER_RIGHT
-import tornadofx.*
-import com.example.todo_desktop.ui.ToDoListView
-import javafx.geometry.Pos
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.HBox
-import javafx.scene.layout.Priority
+import tornadofx.*
+import java.io.File
+import java.io.IOException
+import java.lang.ProcessBuilder
+import java.util.concurrent.TimeUnit
+import edu.uwaterloo.cs.todo.lib.TodoCategoryModel
+import edu.uwaterloo.cs.todo.lib.deserializeCategoryList
+import edu.uwaterloo.cs.todo.lib.serializeCategoryList
+//import jdk.jpackage.internal.IOUtils
+
+import java.util.Locale.Category
+
+//import org.codehaus.groovy.runtime.ProcessGroovyMethods
 
 // Class definition for the list of
 class SubjectListView : View("Subject List") {
-    private var subjects = mutableListOf<String>().observable()
+    //private var subjects = mutableListOf<String>().observable()
     private var favorites = mutableListOf<Boolean>().observable()
+    private var subjects = mutableListOf<String>().observable()
+    private var categories = mutableListOf<TodoCategoryModel>().observable()
+
     val input = SimpleStringProperty()
 
     val mToDoListView : ToDoListView by inject()
 
     override val root = hbox {
-        // Space holder
-        vbox {
-            setPrefSize(10.0, 700.0)
+        // Execute command for listing out all current categories.
+        var s1: String = "./todo-cli-jvm list-categories --json".runCommand(File("./bin"))
+        // Debugging print message
+        println(s1)
+        // Translate json string into a list of Category objects
+        categories = deserializeCategoryList(s1).toObservable()
+        // Enroll the CategoryModel objects into the container
+        for (i in categories) {
+            if (i.favoured) {
+                favorites.add(true)
+            } else {
+                favorites.add(false)
+            }
+            subjects.add(i.name)
         }
+
+        vbox {
+            setPrefSize(15.0, 300.0)
+        }
+
         vbox {
             // Header for the list of subjects
             vbox {
                 alignment = CENTER
+                setPrefSize(160.0,40.0)
                 label("SUBJECTS") {
                     style = "-fx-font: 20 arial;"
                     minWidth(50.0)
-                    minHeight(50.0)
                 }
             }
             // The actual list of subjects
             listview(subjects) {
-                setPrefSize(160.0, 500.0)
+                setPrefSize(160.0, 475.0)
                 onDoubleClick {
                     println("double click on subject list")
                     // First check if the user is clicking the current subject:
@@ -120,7 +148,7 @@ class SubjectListView : View("Subject List") {
                                         subjects.remove(selectedItem)
                                     }
                                 }
-                                alignment = Pos.CENTER
+                                alignment = CENTER
                             }
                         }
                     }
@@ -156,5 +184,28 @@ class SubjectListView : View("Subject List") {
         favorites.add(true)
         favorites.add(true)
         favorites.add(true)
+        //println(serializeList(subjects))
+    }
+    /*
+    fun String.runCommand(workingDir: File) {
+        ProcessBuilder(*split(" ").toTypedArray())
+            .directory(workingDir)
+            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+            .redirectError(ProcessBuilder.Redirect.INHERIT)
+            .start()
+            .waitFor(15, TimeUnit.SECONDS)
+    }
+    */
+    fun String.runCommand(workingDir: File): String {
+        //try {
+            val parts = this.split("\\s".toRegex())
+            val proc = ProcessBuilder(*parts.toTypedArray())
+                .directory(workingDir)
+                .redirectOutput(ProcessBuilder.Redirect.PIPE)
+                .redirectError(ProcessBuilder.Redirect.PIPE)
+                .start()
+
+            proc.waitFor(60, TimeUnit.SECONDS)
+            return proc.inputStream.bufferedReader().readText()
     }
 }
