@@ -11,6 +11,8 @@ import com.example.todo_desktop.app.Styles.Companion.smallText
 import com.example.todo_desktop.common.constant
 import com.example.todo_desktop.controller.ListController
 import com.example.todo_desktop.data.ToDoInfo
+import com.example.todo_desktop.service.RunCommandService
+import com.example.todo_desktop.ui.ToDoListView
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -21,6 +23,8 @@ import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
 import java.awt.TextField
 import java.time.LocalDate
+import edu.uwaterloo.cs.todo.lib.TodoItemModel
+import java.io.File
 import javax.swing.text.Style
 
 class ToDoListView : View("ToDo Content") {
@@ -50,7 +54,8 @@ class ToDoListView : View("ToDo Content") {
     val input = SimpleStringProperty()
 
     val listController : ListController by inject()
-
+    val runCommandSerivce : RunCommandService = RunCommandService()
+    val subjectListView : SubjectListView = SubjectListView()
 
     // constant
     private val PICK_DATE_INDEX = 2
@@ -127,7 +132,7 @@ class ToDoListView : View("ToDo Content") {
                                 addClass(Styles.smallIcon, Styles.calendarIcon)
                             }
                             label(listController.DateToString(it.date)) {
-                                val style = when (it.date.isBefore(LocalDate.now())) {
+                                val style = when (it.date?.isBefore(LocalDate.now())) {
                                     true -> Styles.redText
                                     else -> Styles.blueText
                                 }
@@ -277,11 +282,15 @@ class ToDoListView : View("ToDo Content") {
     }
 
     private fun addToDo(record : MutableList<ToDoInfo>, text : SimpleStringProperty) {
+        var tmpCmd: String = "./todo-cli-jvm add-item --search-category-by id " + constant.curCategory +  " "
+        tmpCmd = tmpCmd + text.value
         if (text.value == "") return
 
         record.add(ToDoInfo(text.value, listController.currPriority, listController.currDueDate))
         text.value = ""
         listController.addToDo(records)
+        runCommandSerivce.runCommand(tmpCmd, File("./bin"))
+        println(tmpCmd)
     }
 
     private fun deleteTodo(record: MutableList<ToDoInfo>, selectedItem : ToDoInfo?) {

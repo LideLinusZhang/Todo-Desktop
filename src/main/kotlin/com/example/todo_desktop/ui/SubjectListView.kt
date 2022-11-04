@@ -1,6 +1,9 @@
 package com.example.todo_desktop.ui
 import com.example.todo_desktop.app.Styles
+import com.example.todo_desktop.controller.ListController
 import com.example.todo_desktop.data.ToDoInfo
+import com.example.todo_desktop.service.RunCommandService
+import com.example.todo_desktop.common.constant
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import javafx.geometry.Pos.CENTER
@@ -13,32 +16,41 @@ import java.io.IOException
 import java.lang.ProcessBuilder
 import java.util.concurrent.TimeUnit
 import edu.uwaterloo.cs.todo.lib.TodoCategoryModel
+import edu.uwaterloo.cs.todo.lib.TodoItemModel
 import edu.uwaterloo.cs.todo.lib.deserializeCategoryList
 import edu.uwaterloo.cs.todo.lib.serializeCategoryList
-//import jdk.jpackage.internal.IOUtils
-
+import edu.uwaterloo.cs.todo.lib.deserializeItemList
+import edu.uwaterloo.cs.todo.lib.serializeItemList
 import java.util.Locale.Category
+import java.time.LocalDate
+import kotlin.properties.Delegates
 
 //import org.codehaus.groovy.runtime.ProcessGroovyMethods
 
 // Class definition for the list of
 class SubjectListView : View("Subject List") {
-    //private var subjects = mutableListOf<String>().observable()
+    val input = SimpleStringProperty()
+    val runCommandSerivce : RunCommandService = RunCommandService()
+    //val mConstant : constant = constant()
+
     private var favorites = mutableListOf<Boolean>().observable()
     private var subjects = mutableListOf<String>().observable()
     private var categories = mutableListOf<TodoCategoryModel>().observable()
+    private var subjectIDs = mutableListOf<Int>().observable()
+    //private var items = mutableListOf<TodoItemModel>().observable()
 
-    val input = SimpleStringProperty()
-
+    var s2: String = "abcdefg"
     val mToDoListView : ToDoListView by inject()
+
 
     override val root = hbox {
         // Execute command for listing out all current categories.
-        var s1: String = "./todo-cli-jvm list-categories --json".runCommand(File("./bin"))
+        var s1: String = runCommandSerivce.runCommand("./todo-cli-jvm list-categories --json", File("./bin"))
         // Debugging print message
         println(s1)
         // Translate json string into a list of Category objects
         categories = deserializeCategoryList(s1).toObservable()
+
         // Enroll the CategoryModel objects into the container
         for (i in categories) {
             if (i.favoured) {
@@ -47,6 +59,7 @@ class SubjectListView : View("Subject List") {
                 favorites.add(false)
             }
             subjects.add(i.name)
+            //subjectIDs.add(i.cate)
         }
 
         vbox {
@@ -68,16 +81,41 @@ class SubjectListView : View("Subject List") {
                 setPrefSize(160.0, 475.0)
                 onDoubleClick {
                     println("double click on subject list")
+                    val doubleClickIdx = selectionModel.selectedIndices[0]+1
+
+                    // Set current Category to the selected one.
+                    constant.curCategory = doubleClickIdx
                     // First check if the user is clicking the current subject:
 
                     // Not clicking current branch -->
                     // Call CLI & search for tasks (with selectedItem as parameter)
-
+                    var loadNewItemListCmd: String = "./todo-cli-jvm list-items " + doubleClickIdx.toString() + " --json"
+                    println(loadNewItemListCmd)
+                    var newItems: String = runCommandSerivce.runCommand(loadNewItemListCmd, File("./bin"))
                     // Delete all tasks in current list.
+                    val tmp : MutableList<TodoItemModel> = deserializeItemList(newItems).toObservable()
                     mToDoListView.records.removeAll(mToDoListView.records)
 
                     // Refill content from database's result
-                    mToDoListView.records.add(ToDoInfo("add1"))
+                    for (i in tmp) {
+                        //record.add(ToDoInfo(text.value, listController.currPriority, listController.currDueDate))
+                        /*mToDoListView.records.add(ToDoInfo(i.name, i.importance.ordinal,
+                            i.deadline?.let { LocalDate(it.year, i.deadline.monthNumber, i.deadline.dayOfMonth) })
+
+                         */
+                        val mYear: Number? = i.deadline?.year
+                        val mMonth: Number? = i.deadline?.monthNumber
+                        val mDay: Number? = i.deadline?.dayOfMonth
+                        if (mYear == null || mMonth == null || mDay == null) {
+                            mToDoListView.records.add(ToDoInfo(i.name, i.importance.ordinal, null))
+                        } else {
+                            val mYearInt = mYear.toInt()
+                            val mMonthInt = mMonth.toInt()
+                            val mDayInt = mDay.toInt()
+                            mToDoListView.records.add(ToDoInfo(i.name, i.importance.ordinal, LocalDate.of(mYearInt, mMonthInt, mDayInt)))
+                        }
+
+                    }
                 }
 
                 setOnKeyPressed {
@@ -176,6 +214,7 @@ class SubjectListView : View("Subject List") {
             setPrefSize(15.0, 700.0)
         }
     }
+
     // Some sample data
     init {
         subjects.add("CS 346")
@@ -184,28 +223,5 @@ class SubjectListView : View("Subject List") {
         favorites.add(true)
         favorites.add(true)
         favorites.add(true)
-        //println(serializeList(subjects))
-    }
-    /*
-    fun String.runCommand(workingDir: File) {
-        ProcessBuilder(*split(" ").toTypedArray())
-            .directory(workingDir)
-            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-            .redirectError(ProcessBuilder.Redirect.INHERIT)
-            .start()
-            .waitFor(15, TimeUnit.SECONDS)
-    }
-    */
-    fun String.runCommand(workingDir: File): String {
-        //try {
-            val parts = this.split("\\s".toRegex())
-            val proc = ProcessBuilder(*parts.toTypedArray())
-                .directory(workingDir)
-                .redirectOutput(ProcessBuilder.Redirect.PIPE)
-                .redirectError(ProcessBuilder.Redirect.PIPE)
-                .start()
-
-            proc.waitFor(60, TimeUnit.SECONDS)
-            return proc.inputStream.bufferedReader().readText()
     }
 }
