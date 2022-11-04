@@ -17,8 +17,6 @@ fun main() {
 
     val commands = arrayOf("git", "status")
 
-    println(mRunCommandService.runCommand(commands))
-
-
+    //println(mRunCommandService.runCommand(commands))
     launch<MainApp>()
 }

@@ -1,6 +1,7 @@
 package com.example.todo_desktop.common
 
 class constant {
+
     companion object {
         val DUE_DATE_TODAY = "Today"
         val DUE_DATE_TOMORROW = "Tomorrow"
@@ -35,6 +36,7 @@ class constant {
         val SORT_DUE_INDEX = 2
         val SORT_STAT = 3
 
+        var curCategory = 0
     }
 }
 
