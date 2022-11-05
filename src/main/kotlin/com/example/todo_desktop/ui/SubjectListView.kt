@@ -23,6 +23,7 @@ import edu.uwaterloo.cs.todo.lib.deserializeItemList
 import edu.uwaterloo.cs.todo.lib.serializeItemList
 import java.util.Locale.Category
 import java.time.LocalDate
+import java.util.*
 import kotlin.properties.Delegates
 
 //import org.codehaus.groovy.runtime.ProcessGroovyMethods
@@ -36,10 +37,9 @@ class SubjectListView : View("Subject List") {
     private var favorites = mutableListOf<Boolean>().observable()
     private var subjects = mutableListOf<String>().observable()
     private var categories = mutableListOf<TodoCategoryModel>().observable()
-    private var subjectIDs = mutableListOf<Int>().observable()
+    private var subjectIDs = mutableListOf<UUID>().observable()
     //private var items = mutableListOf<TodoItemModel>().observable()
 
-    var s2: String = "abcdefg"
     val mToDoListView : ToDoListView by inject()
 
 
@@ -59,7 +59,7 @@ class SubjectListView : View("Subject List") {
                 favorites.add(false)
             }
             subjects.add(i.name)
-            //subjectIDs.add(i.cate)
+            subjectIDs.add(i.uniqueId)
         }
 
         vbox {
@@ -183,7 +183,15 @@ class SubjectListView : View("Subject List") {
                                 button {
                                     addClass(Styles.icon, Styles.trashcanIcon)
                                     action {
+
+                                        val rmIdx = selectionModel.selectedIndices[0]
                                         subjects.remove(selectedItem)
+                                        println(rmIdx)
+                                        var delCmd: String = "./todo-cli-jvm delete-category " + subjectIDs[rmIdx] + " --uuid"
+                                        println(delCmd)
+
+                                        runCommandSerivce.runCommand(delCmd, File("./bin"))
+                                        subjectIDs.removeAt(rmIdx)
                                     }
                                 }
                                 alignment = CENTER
@@ -205,6 +213,8 @@ class SubjectListView : View("Subject List") {
                     action {
                         subjects.add(input.value)
                         favorites.add(false)
+                        var addCatCmd: String = "./todo-cli-jvm add-category " + input.value
+                        runCommandSerivce.runCommand(addCatCmd, File("./bin"))
                         input.value = ""
                     }
                 }
@@ -216,12 +226,4 @@ class SubjectListView : View("Subject List") {
     }
 
     // Some sample data
-    init {
-        subjects.add("CS 346")
-        subjects.add("CS 446")
-        subjects.add("CS 348")
-        favorites.add(true)
-        favorites.add(true)
-        favorites.add(true)
-    }
 }

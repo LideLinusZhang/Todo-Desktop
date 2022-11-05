@@ -25,11 +25,13 @@ import java.awt.TextField
 import java.time.LocalDate
 import edu.uwaterloo.cs.todo.lib.TodoItemModel
 import java.io.File
+import java.util.*
 import javax.swing.text.Style
 
 class ToDoListView : View("ToDo Content") {
 
     val records = mutableListOf<ToDoInfo>().observable()
+    val uuids = mutableListOf<UUID>().observable()
 
     private val DueDateList = FXCollections.observableArrayList("Today", "Tomorrow", "Pick a date")
     private val PriorityList =
@@ -104,7 +106,6 @@ class ToDoListView : View("ToDo Content") {
                 }
             }
         }
-
         addClass(defaultSpacing)
         addClass(Styles.issueList)
         listview (records) {
@@ -180,8 +181,13 @@ class ToDoListView : View("ToDo Content") {
                     val selectedIdx = selectionModel.selectedIndices[0]
                     if (selectedIdx != 0) {
                         val tmpString = records[selectedIdx - 1]
+                        val tmpUUID = uuids[selectedIdx - 1]
+
                         records.removeAt(selectedIdx - 1)
                         records.add(selectedIdx, tmpString)
+                        uuids.removeAt(selectedIdx - 1)
+                        uuids.add(selectedIdx, tmpUUID)
+
                         println("Item switched up")
                     }
                 } else if (it.code.equals(KeyCode.S)) {
@@ -189,8 +195,13 @@ class ToDoListView : View("ToDo Content") {
                     val selectedIdx = selectionModel.selectedIndices[0]
                     if (selectedIdx != records.size-1) {
                         val tmpString = records[selectedIdx + 1]
+                        val tmpUUID = uuids[selectedIdx + 1]
+
                         records.add(selectedIdx, tmpString)
                         records.removeAt(selectedIdx + 2)
+                        uuids.add(selectedIdx, tmpUUID)
+                        uuids.removeAt(selectedIdx + 2)
+
                         println("Item switched down")
                     }
                 }
@@ -290,12 +301,14 @@ class ToDoListView : View("ToDo Content") {
         text.value = ""
         listController.addToDo(records)
         runCommandSerivce.runCommand(tmpCmd, File("./bin"))
-        println(tmpCmd)
     }
 
     private fun deleteTodo(record: MutableList<ToDoInfo>, selectedItem : ToDoInfo?) {
         record.remove(selectedItem)
         listController.deleteToDo(selectedItem, records)
+        var tmpCmd: String = "./todo-cli-jvm list-items --UUID 1"
+        //var res = "result: " + runCommandSerivce.runCommand(tmpCmd, File("./bin"))
+        //println(res)
     }
 
     private fun setPickDate(text : String, list : ObservableList<String>) {
