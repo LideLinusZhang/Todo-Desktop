@@ -13,6 +13,7 @@ import com.example.todo_desktop.controller.ListController
 import com.example.todo_desktop.data.ToDoInfo
 import com.example.todo_desktop.service.RunCommandService
 import com.example.todo_desktop.ui.ToDoListView
+import edu.uwaterloo.cs.todo.lib.TodoCategoryModel
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -24,14 +25,20 @@ import javafx.scene.layout.Priority
 import java.awt.TextField
 import java.time.LocalDate
 import edu.uwaterloo.cs.todo.lib.TodoItemModel
+import edu.uwaterloo.cs.todo.lib.deserializeCategoryList
+import edu.uwaterloo.cs.todo.lib.deserializeItemList
 import java.io.File
 import java.util.*
 import javax.swing.text.Style
 
 class ToDoListView : View("ToDo Content") {
 
-    val records = mutableListOf<ToDoInfo>().observable()
-    val uuids = mutableListOf<UUID>().observable()
+
+    var items = mutableListOf<TodoItemModel>().observable()
+    // This might need to be global
+    companion object {
+        val records = mutableListOf<ToDoInfo>().observable()
+    }
 
     private val DueDateList = FXCollections.observableArrayList("Today", "Tomorrow", "Pick a date")
     private val PriorityList =
@@ -65,7 +72,15 @@ class ToDoListView : View("ToDo Content") {
 
     override val root = vbox {
         stylesheets.add("org/kordamp/bootstrapfx/bootstrapfx.css")
-
+        val subListStr: String = runCommandSerivce.runCommand("./todo-cli-jvm list-categories --json", File("./bin"))
+        var tmpSubjects = mutableListOf<TodoCategoryModel>().observable()
+        tmpSubjects = deserializeCategoryList(subListStr).toObservable()
+        println(tmpSubjects.size)
+        // has to be 4788bec4-1447-4d51-a95e-b6c51f2c69ee
+        println("./todo-cli-jvm list-items " + tmpSubjects[0].uniqueId.toString() + " --uuid")
+        println(tmpSubjects[0].uniqueId.toString())
+        items = deserializeItemList(runCommandSerivce.runCommand(
+            "./todo-cli-jvm list-items " + tmpSubjects[0].uniqueId.toString() + " --json --uuid", File("./bin"))).toObservable()
         hbox().apply{
 
             val currInfo : ToDoInfo
@@ -143,6 +158,8 @@ class ToDoListView : View("ToDo Content") {
                     }
 
                     if (isSelected) {
+                        val rmIdx = selectionModel.selectedIndices[0]
+                        println("line 147")
                         // contain favorite and delete button
                         hbox {
                             button {
@@ -161,9 +178,10 @@ class ToDoListView : View("ToDo Content") {
 
                             button {
                                 addClass(Styles.icon, Styles.trashcanIcon)
-
                                 action {
-                                    print(selectedItem)
+                                    var delCmd: String = "./todo-cli-jvm delete-item " + records[rmIdx].uniqueID + " --uuid"
+                                    println(delCmd)
+                                    runCommandSerivce.runCommand(delCmd, File("./bin"))
                                     deleteTodo(records, selectedItem)
                                 }
                             }
@@ -181,13 +199,8 @@ class ToDoListView : View("ToDo Content") {
                     val selectedIdx = selectionModel.selectedIndices[0]
                     if (selectedIdx != 0) {
                         val tmpString = records[selectedIdx - 1]
-                        val tmpUUID = uuids[selectedIdx - 1]
-
                         records.removeAt(selectedIdx - 1)
                         records.add(selectedIdx, tmpString)
-                        uuids.removeAt(selectedIdx - 1)
-                        uuids.add(selectedIdx, tmpUUID)
-
                         println("Item switched up")
                     }
                 } else if (it.code.equals(KeyCode.S)) {
@@ -195,13 +208,8 @@ class ToDoListView : View("ToDo Content") {
                     val selectedIdx = selectionModel.selectedIndices[0]
                     if (selectedIdx != records.size-1) {
                         val tmpString = records[selectedIdx + 1]
-                        val tmpUUID = uuids[selectedIdx + 1]
-
                         records.add(selectedIdx, tmpString)
                         records.removeAt(selectedIdx + 2)
-                        uuids.add(selectedIdx, tmpUUID)
-                        uuids.removeAt(selectedIdx + 2)
-
                         println("Item switched down")
                     }
                 }
@@ -294,10 +302,16 @@ class ToDoListView : View("ToDo Content") {
 
     private fun addToDo(record : MutableList<ToDoInfo>, text : SimpleStringProperty) {
         var tmpCmd: String = "./todo-cli-jvm add-item --search-category-by id " + constant.curCategory +  " "
-        tmpCmd = tmpCmd + text.value
+        tmpCmd = tmpCmd + text.value + " --uuid"
+        print(tmpCmd)
         if (text.value == "") return
 
-        record.add(ToDoInfo(text.value, listController.currPriority, listController.currDueDate))
+        // Query the database to obtain the last (most recent) item of current category.
+        var tmpitems = mutableListOf<TodoItemModel>().observable()
+        tmpitems = deserializeItemList(runCommandSerivce.runCommand(
+            "./todo-cli-jvm list-items " + constant.curCategory + " --json --uuid", File("./bin"))).toObservable()
+
+        record.add(ToDoInfo(text.value, listController.currPriority, listController.currDueDate, false, tmpitems[tmpitems.size-1].uniqueId))
         text.value = ""
         listController.addToDo(records)
         runCommandSerivce.runCommand(tmpCmd, File("./bin"))
@@ -306,7 +320,7 @@ class ToDoListView : View("ToDo Content") {
     private fun deleteTodo(record: MutableList<ToDoInfo>, selectedItem : ToDoInfo?) {
         record.remove(selectedItem)
         listController.deleteToDo(selectedItem, records)
-        var tmpCmd: String = "./todo-cli-jvm list-items --UUID 1"
+        //var tmpCmd: String = "./todo-cli-jvm list-items --UUID 1"
         //var res = "result: " + runCommandSerivce.runCommand(tmpCmd, File("./bin"))
         //println(res)
     }

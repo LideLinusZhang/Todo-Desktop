@@ -37,7 +37,7 @@ class SubjectListView : View("Subject List") {
     private var favorites = mutableListOf<Boolean>().observable()
     private var subjects = mutableListOf<String>().observable()
     private var categories = mutableListOf<TodoCategoryModel>().observable()
-    private var subjectIDs = mutableListOf<UUID>().observable()
+    private var subjectIDs = mutableListOf<UUID?>().observable()
     //private var items = mutableListOf<TodoItemModel>().observable()
 
     val mToDoListView : ToDoListView by inject()
@@ -61,6 +61,7 @@ class SubjectListView : View("Subject List") {
             subjects.add(i.name)
             subjectIDs.add(i.uniqueId)
         }
+        constant.curCategory = subjectIDs[0]
 
         vbox {
             setPrefSize(15.0, 300.0)
@@ -81,40 +82,46 @@ class SubjectListView : View("Subject List") {
                 setPrefSize(160.0, 475.0)
                 onDoubleClick {
                     println("double click on subject list")
-                    val doubleClickIdx = selectionModel.selectedIndices[0]+1
+                    val doubleClickIdx = selectionModel.selectedIndices[0]
 
                     // Set current Category to the selected one.
-                    constant.curCategory = doubleClickIdx
+                    constant.curCategory = subjectIDs[doubleClickIdx]
+                    println("line 88")
+                    println(constant.curCategory)
                     // First check if the user is clicking the current subject:
 
                     // Not clicking current branch -->
                     // Call CLI & search for tasks (with selectedItem as parameter)
-                    var loadNewItemListCmd: String = "./todo-cli-jvm list-items " + doubleClickIdx.toString() + " --json"
+                    var loadNewItemListCmd: String = "./todo-cli-jvm list-items " + subjectIDs[doubleClickIdx].toString() + " --json --uuid"
                     println(loadNewItemListCmd)
                     var newItems: String = runCommandSerivce.runCommand(loadNewItemListCmd, File("./bin"))
+                    println(newItems)
                     // Delete all tasks in current list.
-                    val tmp : MutableList<TodoItemModel> = deserializeItemList(newItems).toObservable()
-                    mToDoListView.records.removeAll(mToDoListView.records)
+                    if (newItems != "") {
+                        println("Selected category contains items.")
+                        val tmp : MutableList<TodoItemModel> = deserializeItemList(newItems).toObservable()
 
-                    // Refill content from database's result
-                    for (i in tmp) {
-                        //record.add(ToDoInfo(text.value, listController.currPriority, listController.currDueDate))
-                        /*mToDoListView.records.add(ToDoInfo(i.name, i.importance.ordinal,
-                            i.deadline?.let { LocalDate(it.year, i.deadline.monthNumber, i.deadline.dayOfMonth) })
+                        ToDoListView.records.removeAll(ToDoListView.records)
 
-                         */
-                        val mYear: Number? = i.deadline?.year
-                        val mMonth: Number? = i.deadline?.monthNumber
-                        val mDay: Number? = i.deadline?.dayOfMonth
-                        if (mYear == null || mMonth == null || mDay == null) {
-                            mToDoListView.records.add(ToDoInfo(i.name, i.importance.ordinal, null))
-                        } else {
-                            val mYearInt = mYear.toInt()
-                            val mMonthInt = mMonth.toInt()
-                            val mDayInt = mDay.toInt()
-                            mToDoListView.records.add(ToDoInfo(i.name, i.importance.ordinal, LocalDate.of(mYearInt, mMonthInt, mDayInt)))
+                        // Refill content from database's result
+                        for (i in tmp) {
+                            //record.add(ToDoInfo(text.value, listController.currPriority, listController.currDueDate))
+                            /*mToDoListView.records.add(ToDoInfo(i.name, i.importance.ordinal,
+                                i.deadline?.let { LocalDate(it.year, i.deadline.monthNumber, i.deadline.dayOfMonth) })
+                             */
+                            val mYear: Number? = i.deadline?.year
+                            val mMonth: Number? = i.deadline?.monthNumber
+                            val mDay: Number? = i.deadline?.dayOfMonth
+                            if (mYear == null || mMonth == null || mDay == null) {
+                                ToDoListView.records.add(ToDoInfo(i.name, i.importance.ordinal, null, false, i.uniqueId))
+                            } else {
+                                val mYearInt = mYear.toInt()
+                                val mMonthInt = mMonth.toInt()
+                                val mDayInt = mDay.toInt()
+                                ToDoListView.records.add(ToDoInfo(i.name, i.importance.ordinal,
+                                                                    LocalDate.of(mYearInt, mMonthInt, mDayInt), false, i.uniqueId))
+                            }
                         }
-
                     }
                 }
 
@@ -215,6 +222,11 @@ class SubjectListView : View("Subject List") {
                         favorites.add(false)
                         var addCatCmd: String = "./todo-cli-jvm add-category " + input.value
                         runCommandSerivce.runCommand(addCatCmd, File("./bin"))
+                        val updatedSubListStr: String = runCommandSerivce.runCommand("./todo-cli-jvm list-categories --json", File("./bin"))
+                        var tmpSubjectIDs = mutableListOf<TodoCategoryModel>().observable()
+                        tmpSubjectIDs = deserializeCategoryList(updatedSubListStr).toObservable()
+                        val updatedSubListSize = tmpSubjectIDs.size
+                        tmpSubjectIDs.add(tmpSubjectIDs[updatedSubListSize-1])
                         input.value = ""
                     }
                 }
@@ -224,6 +236,5 @@ class SubjectListView : View("Subject List") {
             setPrefSize(15.0, 700.0)
         }
     }
-
     // Some sample data
 }
