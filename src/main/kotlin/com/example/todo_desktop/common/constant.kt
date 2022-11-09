@@ -1,7 +1,13 @@
 package com.example.todo_desktop.common
+import com.example.todo_desktop.service.RunCommandService
+import edu.uwaterloo.cs.todo.lib.deserializeItemList
+import tornadofx.*
+import java.io.File
+import java.util.*
 
 class constant {
-
+    val runCommandSerivce : RunCommandService = RunCommandService()
+    //val tmpUUID: UUID = deserializeItemList(runCommandSerivce.runCommand("./todo-cli-jvm list-categories --json", File("./bin")))
     companion object {
         val DUE_DATE_TODAY = "Today"
         val DUE_DATE_TOMORROW = "Tomorrow"
@@ -36,7 +42,8 @@ class constant {
         val SORT_DUE_INDEX = 2
         val SORT_STAT = 3
 
-        var curCategory = 0
+        var curCategory: UUID? = null
+        var curItems = mutableListOf<UUID>().observable()
     }
 }
 
