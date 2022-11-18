@@ -24,7 +24,7 @@ class RunCommandService {
             .redirectError(ProcessBuilder.Redirect.PIPE)
             .start()
 
-        proc.waitFor(5, TimeUnit.SECONDS)
+        proc.waitFor(10, TimeUnit.SECONDS)
         return proc.inputStream.bufferedReader().readText()
     }
 }

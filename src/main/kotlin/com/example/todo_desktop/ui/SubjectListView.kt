@@ -39,7 +39,6 @@ class SubjectListView : View("Subject List") {
 
     override val root = hbox {
         // Execute command for listing out all current categories.
-        val s0: String = runCommandSerivce.runCommand("cd ../", File("./bin"))
         var s1: String = runCommandSerivce.runCommand("./todo-cli-jvm list-categories --json", File("./bin"))
         // Debugging print message
         println(s1)
@@ -212,13 +211,18 @@ class SubjectListView : View("Subject List") {
                     action {
                         subjects.add(input.value)
                         favorites.add(false)
+                        println("SLV: line 214")
                         var addCatCmd: String = "./todo-cli-jvm add-category " + input.value
+                        println(addCatCmd)
                         runCommandSerivce.runCommand(addCatCmd, File("./bin"))
                         val updatedSubListStr: String = runCommandSerivce.runCommand("./todo-cli-jvm list-categories --json", File("./bin"))
                         var tmpSubjects = mutableListOf<TodoCategoryModel>().observable()
+                        println(updatedSubListStr)
+                        println("SLV: line 218")
                         tmpSubjects = deserializeCategoryList(updatedSubListStr).toObservable()
                         val updatedSubListSize = tmpSubjects.size
                         subjectIDs.add(tmpSubjects[updatedSubListSize-1].uniqueId)
+                        println("SLV: line 222")
                         input.value = ""
                     }
                 }

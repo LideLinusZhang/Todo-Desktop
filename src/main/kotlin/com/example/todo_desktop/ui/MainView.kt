@@ -1,20 +1,22 @@
 package com.example.todo_desktop.ui
-import edu.uwaterloo.cs.todo.lib.TodoCategoryModel
-import edu.uwaterloo.cs.todo.lib.deserializeCategoryList
+
+import com.example.todo_desktop.service.RunCommandService
+import com.example.todo_desktop.service.ServerConfigUpdateService
 import javafx.beans.property.SimpleStringProperty
+import javafx.geometry.Pos.CENTER
 import javafx.scene.layout.BorderPane
 import tornadofx.*
-import javax.swing.text.html.ListView
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.input.KeyCode
 import java.io.File
-import javafx.geometry.Pos.CENTER
-import javax.swing.GroupLayout.Alignment
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Paths
+import javax.swing.text.html.ListView
+
 
 class MainView: View() {
     //val ToDoListView: ToDoListView by inject<ToDoListView>()
+
+    val runCommandSerivce : RunCommandService = RunCommandService()
 
     val a = javaClass.getResourceAsStream("main_view.fxml")
 
@@ -31,6 +33,9 @@ class MainView: View() {
     val userID = SimpleStringProperty()
 
     val password = SimpleStringProperty()
+
+    val serverConfigUpdateService: ServerConfigUpdateService = ServerConfigUpdateService()
+
     init {
         root.setPrefSize(1200.0, 720.0)
         title = "Anywhere ToDo Login"
@@ -48,7 +53,7 @@ class MainView: View() {
                     setPrefSize(400.0, 500.0)
                     fieldset {
                         field("User ID:") {
-                            textfield(password) {
+                            textfield(userID) {
                                 id = "myTextField"
                                 text = "Enter your user ID"
                                 setOnMouseClicked { text = "" }
@@ -57,13 +62,11 @@ class MainView: View() {
                             }
                         }
                         field("Password:") {
-
-                            textfield(userID) {
+                            textfield(password) {
                                 id = "myTextField"
                                 text = "Enter your password"
                                 setOnMouseClicked { text = "" }
                                 setOnKeyPressed {
-
                                 }
                             }
                         }
@@ -73,10 +76,13 @@ class MainView: View() {
                             button("Login") {
                                 setPrefSize(100.0, 30.0)
                                 action {
-                                    title = "Anywhere ToDo"
-                                    root.top = headerView.root
-                                    root.center = myList.root
-                                    root.left = subjectList.root
+                                    serverConfigUpdateService.updateCredential(userID, password)
+                                    if (attemptSync()) {
+                                        title = "Anywhere ToDo"
+                                        root.top = headerView.root
+                                        root.center = myList.root
+                                        root.left = subjectList.root
+                                    }
                                 }
                             }
                             vbox {
@@ -84,7 +90,13 @@ class MainView: View() {
                             }
                             button("Sign up") {
                                 setPrefSize(100.0, 30.0)
+                                //sign-up --username linus --password 123456
                                 action {
+                                    runCommandSerivce.runCommand(
+                                        "./todo-cli-jvm sign-up --username "+userID.getValue()+" --password "+password.getValue(),
+                                        File("./bin"))
+                                    serverConfigUpdateService.updateCredential(userID, password)
+                                    attemptSync()
                                     title = "Anywhere ToDo"
                                     root.top = headerView.root
                                     root.center = myList.root
@@ -96,6 +108,14 @@ class MainView: View() {
                 }
             }
         }
+    }
+
+    fun attemptSync(): Boolean {
+        val syncStatus: String = runCommandSerivce.runCommand("./todo-cli-jvm sync-from-server", File("./bin"))
+        println(syncStatus)
+        runCommandSerivce.runCommand("rm data.db", File("./bin"))
+        runCommandSerivce.runCommand("./todo-cli-jvm sync-from-server", File("./bin"))
+        return syncStatus == "Synchronization successful.\n"
     }
 }
 
