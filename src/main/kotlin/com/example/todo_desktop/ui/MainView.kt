@@ -4,12 +4,11 @@ import com.example.todo_desktop.service.RunCommandService
 import com.example.todo_desktop.service.ServerConfigUpdateService
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos.CENTER
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.BorderPane
 import tornadofx.*
 import java.io.File
-import java.nio.charset.StandardCharsets
-import java.nio.file.Files
-import java.nio.file.Paths
 import javax.swing.text.html.ListView
 
 

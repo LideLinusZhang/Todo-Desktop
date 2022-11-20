@@ -21,6 +21,7 @@ import edu.uwaterloo.cs.todo.lib.deserializeCategoryList
 import edu.uwaterloo.cs.todo.lib.serializeCategoryList
 import edu.uwaterloo.cs.todo.lib.deserializeItemList
 import edu.uwaterloo.cs.todo.lib.serializeItemList
+import javafx.scene.input.KeyEvent
 import java.util.Locale.Category
 import java.time.LocalDate
 import java.util.*
@@ -57,6 +58,17 @@ class SubjectListView : View("Subject List") {
             }
             constant.curCategory = subjectIDs[0]
         }
+
+        addEventFilter(KeyEvent.KEY_PRESSED) { event: KeyEvent ->
+            println("Key pressed")
+            if (event.getCode() === KeyCode.U) {
+                println("U pressed")
+            } else if (event.getCode() === KeyCode.R) {
+                println("R pressed")
+            }
+            event.consume()
+        }
+
         vbox {
             setPrefSize(15.0, 300.0)
         }
@@ -222,6 +234,7 @@ class SubjectListView : View("Subject List") {
                         tmpSubjects = deserializeCategoryList(updatedSubListStr).toObservable()
                         val updatedSubListSize = tmpSubjects.size
                         subjectIDs.add(tmpSubjects[updatedSubListSize-1].uniqueId)
+                        constant.undoOp = 1
                         println("SLV: line 222")
                         input.value = ""
                     }
@@ -231,6 +244,8 @@ class SubjectListView : View("Subject List") {
         vbox {
             setPrefSize(15.0, 700.0)
         }
+
+
     }
     // Some sample data
 }
