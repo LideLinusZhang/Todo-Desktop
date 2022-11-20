@@ -63,6 +63,18 @@ class SubjectListView : View("Subject List") {
             println("Key pressed")
             if (event.getCode() === KeyCode.U) {
                 println("U pressed")
+                if (constant.undoOp == 1) {
+                    val tmpIdx = subjects.size-1
+                    println("SLV: line 68")
+                    subjects.removeAt(tmpIdx)
+                    println("SLV: line 70")
+                    println("SLV: line 72")
+                    var delCmd: String = "./todo-cli-jvm delete-category " + subjectIDs[tmpIdx] + " --uuid"
+                    runCommandSerivce.runCommand(delCmd, File("./bin"))
+                    println("SLV: line 74")
+                    subjectIDs.removeAt(tmpIdx)
+                    println("SLV: line 77")
+                }
             } else if (event.getCode() === KeyCode.R) {
                 println("R pressed")
             }
