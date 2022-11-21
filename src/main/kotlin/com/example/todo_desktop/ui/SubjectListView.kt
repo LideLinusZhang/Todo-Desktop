@@ -60,24 +60,35 @@ class SubjectListView : View("Subject List") {
             constant.curCategory = subjectIDs[0]
         }
 
+        // Handling undo/redo:
         addEventFilter(KeyEvent.KEY_PRESSED) { event: KeyEvent ->
             println("Key pressed")
-            if (event.getCode() === KeyCode.U) {
+            val tmpIdx = subjects.size-1
+            if (event.getCode() === KeyCode.F1) {
                 println("U pressed")
+                println("SLV: 69")
                 if (constant.undoCatOpStack.peek().opCode == 1) {
-                    val tmpIdx = subjects.size-1
                     subjects.removeAt(tmpIdx)
                     var delCmd: String = "./todo-cli-jvm delete-category " + subjectIDs[tmpIdx] + " --uuid"
                     runCommandSerivce.runCommand(delCmd, File("./bin"))
                     subjectIDs.removeAt(tmpIdx)
-                    constant.redoCatOpStack.push(constant.undoCatOpStack.peek())
-                    constant.undoCatOpStack.pop()
-                    println("SLV: line 77")
                 } else if (constant.undoCatOpStack.peek().opCode == 2) {
 
                 }
-            } else if (event.getCode() === KeyCode.R) {
+                println("SLV: 78")
+                constant.redoCatOpStack.push(constant.undoCatOpStack.peek())
+                constant.undoCatOpStack.pop()
+            } else if (event.getCode() === KeyCode.F2) {
                 println("R pressed")
+                if (constant.redoCatOpStack.peek().opCode == 1) {
+                    subjects.add(constant.redoCatOpStack.peek().name)
+                    subjectIDs.add(constant.redoCatOpStack.peek().uuid)
+                    val addCmd: String = "./todo-cli-jvm add-category " + constant.redoCatOpStack.peek().name
+                    runCommandSerivce.runCommand(addCmd, File("./bin"))
+                }
+                constant.undoCatOpStack.push(constant.redoCatOpStack.peek())
+                constant.redoCatOpStack.pop()
+
             }
             event.consume()
         }
@@ -248,7 +259,7 @@ class SubjectListView : View("Subject List") {
                         tmpSubjects = deserializeCategoryList(updatedSubListStr).toObservable()
                         val updatedSubListSize = tmpSubjects.size
                         subjectIDs.add(tmpSubjects[updatedSubListSize-1].uniqueId)
-                        constant.undoCatOpStack.push(catOp(1, subjects[tmpIdx], false))
+                        constant.undoCatOpStack.push(catOp(1, subjects[tmpIdx], false, subjectIDs[tmpIdx]))
                         println("SLV: line 222")
                         input.value = ""
                     }

@@ -69,4 +69,4 @@ class constant {
 }
 
 class dbConfig(val url: String, val type: String, val user: String, val password: String)
-class catOp(val opCode: Int, val name: String, val fav: Boolean)
+class catOp(val opCode: Int, val name: String, val fav: Boolean, val uuid: UUID?)
