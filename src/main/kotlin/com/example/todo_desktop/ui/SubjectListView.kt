@@ -1,5 +1,6 @@
 package com.example.todo_desktop.ui
 import com.example.todo_desktop.app.Styles
+import com.example.todo_desktop.common.catOp
 import com.example.todo_desktop.controller.ListController
 import com.example.todo_desktop.data.ToDoInfo
 import com.example.todo_desktop.service.RunCommandService
@@ -63,20 +64,16 @@ class SubjectListView : View("Subject List") {
             println("Key pressed")
             if (event.getCode() === KeyCode.U) {
                 println("U pressed")
-                if (constant.undoStack.peek() == 1) {
+                if (constant.undoCatOpStack.peek().opCode == 1) {
                     val tmpIdx = subjects.size-1
-                    println("SLV: line 68")
                     subjects.removeAt(tmpIdx)
-                    println("SLV: line 70")
-                    println("SLV: line 72")
                     var delCmd: String = "./todo-cli-jvm delete-category " + subjectIDs[tmpIdx] + " --uuid"
                     runCommandSerivce.runCommand(delCmd, File("./bin"))
-                    println("SLV: line 74")
                     subjectIDs.removeAt(tmpIdx)
-                    constant.undoStack.pop()
-                    constant.redoStack.push(1)
+                    constant.redoCatOpStack.push(constant.undoCatOpStack.peek())
+                    constant.undoCatOpStack.pop()
                     println("SLV: line 77")
-                } else if (constant.undoOp == 2) {
+                } else if (constant.undoCatOpStack.peek().opCode == 2) {
 
                 }
             } else if (event.getCode() === KeyCode.R) {
@@ -238,6 +235,7 @@ class SubjectListView : View("Subject List") {
                     println("Add button settings")
                     action {
                         subjects.add(input.value)
+                        val tmpIdx = subjects.size - 1
                         favorites.add(false)
                         println("SLV: line 214")
                         var addCatCmd: String = "./todo-cli-jvm add-category " + input.value
@@ -250,7 +248,7 @@ class SubjectListView : View("Subject List") {
                         tmpSubjects = deserializeCategoryList(updatedSubListStr).toObservable()
                         val updatedSubListSize = tmpSubjects.size
                         subjectIDs.add(tmpSubjects[updatedSubListSize-1].uniqueId)
-                        constant.undoStack.push(1)
+                        constant.undoCatOpStack.push(catOp(1, subjects[tmpIdx], false))
                         println("SLV: line 222")
                         input.value = ""
                     }

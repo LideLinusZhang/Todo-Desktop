@@ -55,8 +55,8 @@ class constant {
             7: fav a todoitem
             8: unfav a todoitem
          */
-        var undoStack = ArrayDeque<Int>()
-        var redoStack = ArrayDeque<Int>()
+        var undoCatOpStack = ArrayDeque<catOp>()
+        var redoCatOpStack = ArrayDeque<catOp>()
 
         var undoCatName = ""
         var undoCatFav = false
@@ -69,3 +69,4 @@ class constant {
 }
 
 class dbConfig(val url: String, val type: String, val user: String, val password: String)
+class catOp(val opCode: Int, val name: String, val fav: Boolean)
