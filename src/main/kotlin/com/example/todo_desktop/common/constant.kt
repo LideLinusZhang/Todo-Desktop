@@ -55,8 +55,8 @@ class constant {
             7: fav a todoitem
             8: unfav a todoitem
          */
-        var undoOp = 0
-        var redoOp = 0
+        var undoStack = ArrayDeque<Int>()
+        var redoStack = ArrayDeque<Int>()
 
         var undoCatName = ""
         var undoCatFav = false

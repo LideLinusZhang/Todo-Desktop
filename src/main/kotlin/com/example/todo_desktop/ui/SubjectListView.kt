@@ -63,7 +63,7 @@ class SubjectListView : View("Subject List") {
             println("Key pressed")
             if (event.getCode() === KeyCode.U) {
                 println("U pressed")
-                if (constant.undoOp == 1) {
+                if (constant.undoStack.peek() == 1) {
                     val tmpIdx = subjects.size-1
                     println("SLV: line 68")
                     subjects.removeAt(tmpIdx)
@@ -73,7 +73,11 @@ class SubjectListView : View("Subject List") {
                     runCommandSerivce.runCommand(delCmd, File("./bin"))
                     println("SLV: line 74")
                     subjectIDs.removeAt(tmpIdx)
+                    constant.undoStack.pop()
+                    constant.redoStack.push(1)
                     println("SLV: line 77")
+                } else if (constant.undoOp == 2) {
+
                 }
             } else if (event.getCode() === KeyCode.R) {
                 println("R pressed")
@@ -246,7 +250,7 @@ class SubjectListView : View("Subject List") {
                         tmpSubjects = deserializeCategoryList(updatedSubListStr).toObservable()
                         val updatedSubListSize = tmpSubjects.size
                         subjectIDs.add(tmpSubjects[updatedSubListSize-1].uniqueId)
-                        constant.undoOp = 1
+                        constant.undoStack.push(1)
                         println("SLV: line 222")
                         input.value = ""
                     }
