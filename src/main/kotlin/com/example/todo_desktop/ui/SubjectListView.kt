@@ -65,30 +65,47 @@ class SubjectListView : View("Subject List") {
             println("Key pressed")
             val tmpIdx = subjects.size-1
             if (event.getCode() === KeyCode.F1) {
-                println("U pressed")
+                println("F1 pressed")
                 println("SLV: 69")
-                if (constant.undoCatOpStack.peek().opCode == 1) {
-                    subjects.removeAt(tmpIdx)
-                    var delCmd: String = "./todo-cli-jvm delete-category " + subjectIDs[tmpIdx] + " --uuid"
-                    runCommandSerivce.runCommand(delCmd, File("./bin"))
-                    subjectIDs.removeAt(tmpIdx)
-                } else if (constant.undoCatOpStack.peek().opCode == 2) {
-
+                if (constant.undoCatOpStack.isNotEmpty()) {
+                    if (constant.undoCatOpStack.peek().opCode == 1) {
+                        subjects.removeAt(tmpIdx)
+                        var delCmd: String = "./todo-cli-jvm delete-category " + subjectIDs[tmpIdx] + " --uuid"
+                        runCommandSerivce.runCommand(delCmd, File("./bin"))
+                        subjectIDs.removeAt(tmpIdx)
+                    } else if (constant.undoCatOpStack.peek().opCode == 2) {
+                        val tmpName = constant.undoCatOpStack.peek().name
+                        subjects.add(tmpName)
+                        var addCmd: String = "./todo-cli-jvm add-category " + tmpName
+                        runCommandSerivce.runCommand(addCmd, File("./bin"))
+                        subjectIDs.add(constant.undoCatOpStack.peek().uuid)
+                        favorites.add(constant.undoCatOpStack.peek().fav)
+                    }
+                    println("SLV: 78")
+                    constant.redoCatOpStack.push(constant.undoCatOpStack.peek())
+                    constant.undoCatOpStack.pop()
                 }
-                println("SLV: 78")
-                constant.redoCatOpStack.push(constant.undoCatOpStack.peek())
-                constant.undoCatOpStack.pop()
+
             } else if (event.getCode() === KeyCode.F2) {
-                println("R pressed")
-                if (constant.redoCatOpStack.peek().opCode == 1) {
-                    subjects.add(constant.redoCatOpStack.peek().name)
-                    subjectIDs.add(constant.redoCatOpStack.peek().uuid)
-                    val addCmd: String = "./todo-cli-jvm add-category " + constant.redoCatOpStack.peek().name
-                    runCommandSerivce.runCommand(addCmd, File("./bin"))
+                println("F2 pressed")
+                if (constant.redoCatOpStack.isNotEmpty()) {
+                    val redoOpCode = constant.redoCatOpStack.peek().opCode
+                    if (redoOpCode == 1) {
+                        subjects.add(constant.redoCatOpStack.peek().name)
+                        subjectIDs.add(constant.redoCatOpStack.peek().uuid)
+                        val addCmd: String = "./todo-cli-jvm add-category " + constant.redoCatOpStack.peek().name
+                        runCommandSerivce.runCommand(addCmd, File("./bin"))
+                    } else if (redoOpCode == 2) {
+                        println("SLV: 94")
+                        var delIdx = subjectIDs.indexOf(constant.redoCatOpStack.peek().uuid)
+                        var delCmd: String = "./todo-cli-jvm delete-category " + constant.redoCatOpStack.peek().uuid
+                        subjects.removeAt(delIdx)
+                        subjectIDs.removeAt(delIdx)
+                        favorites.removeAt(delIdx)
+                    }
+                    constant.undoCatOpStack.push(constant.redoCatOpStack.peek())
+                    constant.redoCatOpStack.pop()
                 }
-                constant.undoCatOpStack.push(constant.redoCatOpStack.peek())
-                constant.redoCatOpStack.pop()
-
             }
             event.consume()
         }
@@ -220,10 +237,12 @@ class SubjectListView : View("Subject List") {
                                     addClass(Styles.icon, Styles.trashcanIcon)
                                     action {
                                         val rmIdx = selectionModel.selectedIndices[0]
+                                        constant.undoCatOpStack.push(catOp(2, subjects[rmIdx], favorites[rmIdx], subjectIDs[rmIdx]))
                                         subjects.remove(selectedItem)
                                         var delCmd: String = "./todo-cli-jvm delete-category " + subjectIDs[rmIdx] + " --uuid"
                                         runCommandSerivce.runCommand(delCmd, File("./bin"))
                                         subjectIDs.removeAt(rmIdx)
+                                        favorites.removeAt(rmIdx)
                                     }
                                 }
                                 alignment = CENTER
