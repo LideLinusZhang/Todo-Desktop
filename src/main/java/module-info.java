@@ -11,6 +11,7 @@ module com.example.todo_desktop.ui {
     requires kotlin.reflect;
     requires kotlinx.datetime;
     requires jdk.jpackage;
+    requires jdk.jfr;
 
     opens com.example.todo_desktop.ui;
     exports com.example.todo_desktop.ui;

@@ -71,18 +71,19 @@ class ToDoListView : View("ToDo Content") {
     private val DUE_DATE_DEFAULT = 0
 
     override val root = vbox {
+        println("ToDoListView: outermost vbox")
         stylesheets.add("org/kordamp/bootstrapfx/bootstrapfx.css")
         val subListStr: String = runCommandSerivce.runCommand("./todo-cli-jvm list-categories --json", File("./bin"))
         var tmpSubjects = mutableListOf<TodoCategoryModel>().observable()
-        tmpSubjects = deserializeCategoryList(subListStr).toObservable()
-        println(tmpSubjects.size)
-        // has to be 4788bec4-1447-4d51-a95e-b6c51f2c69ee
-        println("./todo-cli-jvm list-items " + tmpSubjects[0].uniqueId.toString() + " --uuid")
-        println(tmpSubjects[0].uniqueId.toString())
-        items = deserializeItemList(runCommandSerivce.runCommand(
-            "./todo-cli-jvm list-items " + tmpSubjects[0].uniqueId.toString() + " --json --uuid", File("./bin"))).toObservable()
+        if (subListStr.substring(0,2) != "[]") {
+            tmpSubjects = deserializeCategoryList(subListStr).toObservable()
+            println("./todo-cli-jvm list-items " + tmpSubjects[0].uniqueId.toString() + " --uuid")
+            println(tmpSubjects[0].uniqueId.toString())
+            items = deserializeItemList(runCommandSerivce.runCommand(
+                "./todo-cli-jvm list-items " + tmpSubjects[0].uniqueId.toString() + " --json --uuid", File("./bin"))).toObservable()
+        }
         hbox().apply{
-
+            println("ToDoListView: hbox containing padding")
             val currInfo : ToDoInfo
 
             paddingLeft = 10.0
@@ -301,28 +302,26 @@ class ToDoListView : View("ToDo Content") {
     }
 
     private fun addToDo(record : MutableList<ToDoInfo>, text : SimpleStringProperty) {
+        if (text.value == "") return
         var tmpCmd: String = "./todo-cli-jvm add-item --search-category-by id " + constant.curCategory +  " "
         tmpCmd = tmpCmd + text.value + " --uuid"
-        print(tmpCmd)
-        if (text.value == "") return
+        println(tmpCmd)
+        runCommandSerivce.runCommand(tmpCmd, File("./bin"))
 
         // Query the database to obtain the last (most recent) item of current category.
         var tmpitems = mutableListOf<TodoItemModel>().observable()
+        println(constant.curCategory)
         tmpitems = deserializeItemList(runCommandSerivce.runCommand(
             "./todo-cli-jvm list-items " + constant.curCategory + " --json --uuid", File("./bin"))).toObservable()
-
         record.add(ToDoInfo(text.value, listController.currPriority, listController.currDueDate, false, tmpitems[tmpitems.size-1].uniqueId))
         text.value = ""
         listController.addToDo(records)
-        runCommandSerivce.runCommand(tmpCmd, File("./bin"))
+        //runCommandSerivce.runCommand(tmpCmd, File("./bin"))
     }
 
     private fun deleteTodo(record: MutableList<ToDoInfo>, selectedItem : ToDoInfo?) {
         record.remove(selectedItem)
         listController.deleteToDo(selectedItem, records)
-        //var tmpCmd: String = "./todo-cli-jvm list-items --UUID 1"
-        //var res = "result: " + runCommandSerivce.runCommand(tmpCmd, File("./bin"))
-        //println(res)
     }
 
     private fun setPickDate(text : String, list : ObservableList<String>) {

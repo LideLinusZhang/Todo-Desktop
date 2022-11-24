@@ -1,9 +1,9 @@
 package com.example.todo_desktop.common
+import com.example.todo_desktop.data.ToDoInfo
 import com.example.todo_desktop.service.RunCommandService
-import edu.uwaterloo.cs.todo.lib.deserializeItemList
 import tornadofx.*
-import java.io.File
 import java.util.*
+
 
 class constant {
     val runCommandSerivce : RunCommandService = RunCommandService()
@@ -44,7 +44,29 @@ class constant {
 
         var curCategory: UUID? = null
         var curItems = mutableListOf<UUID>().observable()
+
+        /*
+            1: add a category
+            2: delete a category
+            3: fav a category
+            4: unfav a category
+            5: add a todoitem
+            6: delete a todoitem
+            7: fav a todoitem
+            8: unfav a todoitem
+         */
+        var undoCatOpStack = ArrayDeque<catOp>()
+        var redoCatOpStack = ArrayDeque<catOp>()
+
+        var undoCatName = ""
+        var undoCatFav = false
+        var redoCatName = ""
+        var redoCatFav = false
+
+        var undoTodoItem = ToDoInfo("", 3, date = null, false, UUID.randomUUID())
+        var redoTodoItem = ToDoInfo("", 3, date = null, false, UUID.randomUUID())
     }
 }
 
 class dbConfig(val url: String, val type: String, val user: String, val password: String)
+class catOp(val opCode: Int, val name: String, val fav: Boolean, val uuid: UUID?)
