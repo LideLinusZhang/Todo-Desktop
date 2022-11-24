@@ -96,7 +96,6 @@ class SubjectListView : View("Subject List") {
                         val addCmd: String = "./todo-cli-jvm add-category " + constant.redoCatOpStack.peek().name
                         runCommandSerivce.runCommand(addCmd, File("./bin"))
                     } else if (redoOpCode == 2) {
-                        println("SLV: 94")
                         var delIdx = subjectIDs.indexOf(constant.redoCatOpStack.peek().uuid)
                         var delCmd: String = "./todo-cli-jvm delete-category " + constant.redoCatOpStack.peek().uuid
                         subjects.removeAt(delIdx)

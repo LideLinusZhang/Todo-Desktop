@@ -302,24 +302,20 @@ class ToDoListView : View("ToDo Content") {
     }
 
     private fun addToDo(record : MutableList<ToDoInfo>, text : SimpleStringProperty) {
-        println("TDLV: 305")
         if (text.value == "") return
         var tmpCmd: String = "./todo-cli-jvm add-item --search-category-by id " + constant.curCategory +  " "
         tmpCmd = tmpCmd + text.value + " --uuid"
         println(tmpCmd)
-        println("TDLV: 310")
         runCommandSerivce.runCommand(tmpCmd, File("./bin"))
 
         // Query the database to obtain the last (most recent) item of current category.
-        println("line 314")
         var tmpitems = mutableListOf<TodoItemModel>().observable()
+        println(constant.curCategory)
         tmpitems = deserializeItemList(runCommandSerivce.runCommand(
             "./todo-cli-jvm list-items " + constant.curCategory + " --json --uuid", File("./bin"))).toObservable()
-        println("line 318")
         record.add(ToDoInfo(text.value, listController.currPriority, listController.currDueDate, false, tmpitems[tmpitems.size-1].uniqueId))
         text.value = ""
         listController.addToDo(records)
-        println("line 322")
         //runCommandSerivce.runCommand(tmpCmd, File("./bin"))
     }
 
