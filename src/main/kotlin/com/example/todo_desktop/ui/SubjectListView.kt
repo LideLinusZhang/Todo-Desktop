@@ -159,12 +159,14 @@ class SubjectListView : View("Subject List") {
                             val mDay: Number? = i.deadline?.dayOfMonth
                             if (mYear == null || mMonth == null || mDay == null) {
                                 ToDoListView.records.add(ToDoInfo(i.name, i.importance.ordinal, null, false, i.uniqueId))
+                                println(i.uniqueId)
                             } else {
                                 val mYearInt = mYear.toInt()
                                 val mMonthInt = mMonth.toInt()
                                 val mDayInt = mDay.toInt()
                                 ToDoListView.records.add(ToDoInfo(i.name, i.importance.ordinal,
                                                                     LocalDate.of(mYearInt, mMonthInt, mDayInt), false, i.uniqueId))
+                                println(i.uniqueId)
                             }
                         }
                     }

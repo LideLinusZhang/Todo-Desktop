@@ -9,6 +9,7 @@ import com.example.todo_desktop.app.Styles.Companion.mediumText
 import com.example.todo_desktop.app.Styles.Companion.smallSpacing
 import com.example.todo_desktop.app.Styles.Companion.smallText
 import com.example.todo_desktop.common.constant
+import com.example.todo_desktop.common.itemOp
 import com.example.todo_desktop.controller.ListController
 import com.example.todo_desktop.data.ToDoInfo
 import com.example.todo_desktop.service.RunCommandService
@@ -27,12 +28,12 @@ import java.time.LocalDate
 import edu.uwaterloo.cs.todo.lib.TodoItemModel
 import edu.uwaterloo.cs.todo.lib.deserializeCategoryList
 import edu.uwaterloo.cs.todo.lib.deserializeItemList
+import javafx.scene.input.KeyEvent
 import java.io.File
 import java.util.*
 import javax.swing.text.Style
 
 class ToDoListView : View("ToDo Content") {
-
 
     var items = mutableListOf<TodoItemModel>().observable()
     // This might need to be global
@@ -82,6 +83,7 @@ class ToDoListView : View("ToDo Content") {
             items = deserializeItemList(runCommandSerivce.runCommand(
                 "./todo-cli-jvm list-items " + tmpSubjects[0].uniqueId.toString() + " --json --uuid", File("./bin"))).toObservable()
         }
+
         hbox().apply{
             println("ToDoListView: hbox containing padding")
             val currInfo : ToDoInfo
@@ -159,8 +161,6 @@ class ToDoListView : View("ToDo Content") {
                     }
 
                     if (isSelected) {
-                        val rmIdx = selectionModel.selectedIndices[0]
-                        println("line 147")
                         // contain favorite and delete button
                         hbox {
                             button {
@@ -180,9 +180,17 @@ class ToDoListView : View("ToDo Content") {
                             button {
                                 addClass(Styles.icon, Styles.trashcanIcon)
                                 action {
+                                    /*
+                                    ./todo-cli-jvm delete-item 63660853-df01-4b37-ac55-5bda87e06dc9 --uuid
+                                    ./todo-cli-jvm delete-item 63660853-df01-4b37-ac55-5bda87e06dc9 --uuid
+                                     */
+                                    val rmIdx = selectionModel.selectedIndices[0]
+                                    println(records[rmIdx].info)
                                     var delCmd: String = "./todo-cli-jvm delete-item " + records[rmIdx].uniqueID + " --uuid"
                                     println(delCmd)
                                     runCommandSerivce.runCommand(delCmd, File("./bin"))
+
+                                    constant.undoItemOpStack.push(selectedItem?.let { it1 -> itemOp(2, it1) })
                                     deleteTodo(records, selectedItem)
                                 }
                             }
@@ -193,6 +201,7 @@ class ToDoListView : View("ToDo Content") {
             }
             // when delete key is hit, delete the current Todo
             setOnKeyPressed {
+                val tmpIdx = records.size-1
                 if (it.code.equals(KeyCode.BACK_SPACE)) {
                     deleteTodo(records, selectedItem)
                 } else if (it.code.equals(KeyCode.W)) {
@@ -212,6 +221,74 @@ class ToDoListView : View("ToDo Content") {
                         records.add(selectedIdx, tmpString)
                         records.removeAt(selectedIdx + 2)
                         println("Item switched down")
+                    }
+                } else if (it.code.equals(KeyCode.F1)) {
+                    println("F1 pressed")
+                    println("TDLV: 93")
+                    if (constant.undoItemOpStack.isNotEmpty()) {
+                        // Undo an add item operation.
+                        if (constant.undoItemOpStack.peek().opCode == 1) {
+                            println("TDLV: 96")
+                            records.removeAll(constant.undoItemOpStack.peek().toDoInfo)
+                            println("TDLV: 98")
+                            var delCmd: String = "./todo-cli-jvm delete-item " + constant.undoItemOpStack.peek().toDoInfo.uniqueID + " --uuid"
+                            runCommandSerivce.runCommand(delCmd, File("./bin"))
+                            println("TDLV: 101")
+                            //records.removeAt(tmpIdx)
+                            println("TDLV: 103")
+                            constant.redoItemOpStack.push(constant.undoItemOpStack.peek())
+
+                        // Undo a delete item operation.
+                        } else if (constant.undoItemOpStack.peek().opCode == 2) {
+                            val tmpName = constant.undoItemOpStack.peek().toDoInfo.info
+                            var addCmd: String = "./todo-cli-jvm add-item --search-category-by id " +
+                                    constant.curCategory + " " + constant.undoItemOpStack.peek().toDoInfo.info + " --uuid"
+                            println(addCmd)
+                            runCommandSerivce.runCommand(addCmd, File("./bin"))
+                            println("TDLV: 285")
+                            var searchCmd: String = "./todo-cli-jvm list-items " + constant.curCategory + " --json --uuid"
+                            print("searchCmd: ")
+                            println(searchCmd)
+                            val rawSearchRes: String = runCommandSerivce.runCommand(searchCmd, File("./bin"))
+                            println("TDLV: 288")
+                            var searchRes = mutableListOf<TodoItemModel>().observable()
+                            println("TDLV: 290")
+                            searchRes = deserializeItemList(rawSearchRes).toObservable()
+                            println("TDLV: 292")
+                            for (i in searchRes) {
+                                if (i.name == constant.undoItemOpStack.peek().toDoInfo.info) {
+                                    val tmpItem: ToDoInfo = ToDoInfo(i.name, i.importance.ordinal, null, i.favoured, i.uniqueId)
+                                    println(i.description)
+                                    println("TDLV: 296")
+                                    constant.redoItemOpStack.push(itemOp(2, tmpItem))
+                                    println("TDLV: 298")
+                                    records.add(tmpItem)
+                                    println("TDLV: 300")
+                                    break
+                                }
+                            }
+                            println(addCmd)
+                        }
+                        constant.undoItemOpStack.pop()
+                    }
+                } else if (it.code.equals(KeyCode.F2)) {
+                    println("F2 pressed on Todo Item List")
+                    if (constant.redoItemOpStack.isNotEmpty()) {
+                        // Redo an add operation.
+                        if (constant.redoItemOpStack.peek().opCode == 1) {
+                            records.add(constant.redoItemOpStack.peek().toDoInfo)
+                            var addCmd: String = "./todo-cli-jvm add-item --search-category-by id " +
+                                    constant.curCategory + " --uuid"
+                            runCommandSerivce.runCommand(addCmd, File("./bin"))
+                        // Redo a delete operation.
+                        } else if (constant.redoItemOpStack.peek().opCode == 2) {
+                            val delCmd: String = "./todo-cli-jvm delete-item " + constant.redoItemOpStack.peek().toDoInfo.uniqueID + " --uuid"
+                            runCommandSerivce.runCommand(delCmd, File("./bin"))
+                            println(delCmd)
+                            records.removeAll(constant.redoItemOpStack.peek().toDoInfo)
+                        }
+                        constant.undoItemOpStack.push(constant.redoItemOpStack.peek())
+                        constant.redoItemOpStack.pop()
                     }
                 }
             }
@@ -302,7 +379,9 @@ class ToDoListView : View("ToDo Content") {
     }
 
     private fun addToDo(record : MutableList<ToDoInfo>, text : SimpleStringProperty) {
+        println("TDLV: add op starts")
         if (text.value == "") return
+
         var tmpCmd: String = "./todo-cli-jvm add-item --search-category-by id " + constant.curCategory +  " "
         tmpCmd = tmpCmd + text.value + " --uuid"
         println(tmpCmd)
@@ -316,7 +395,7 @@ class ToDoListView : View("ToDo Content") {
         record.add(ToDoInfo(text.value, listController.currPriority, listController.currDueDate, false, tmpitems[tmpitems.size-1].uniqueId))
         text.value = ""
         listController.addToDo(records)
-        //runCommandSerivce.runCommand(tmpCmd, File("./bin"))
+        constant.undoItemOpStack.push(itemOp(1, records[records.size-1]))
     }
 
     private fun deleteTodo(record: MutableList<ToDoInfo>, selectedItem : ToDoInfo?) {

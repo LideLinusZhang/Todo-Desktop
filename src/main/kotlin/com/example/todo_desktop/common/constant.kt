@@ -4,7 +4,6 @@ import com.example.todo_desktop.service.RunCommandService
 import tornadofx.*
 import java.util.*
 
-
 class constant {
     val runCommandSerivce : RunCommandService = RunCommandService()
     //val tmpUUID: UUID = deserializeItemList(runCommandSerivce.runCommand("./todo-cli-jvm list-categories --json", File("./bin")))
@@ -57,6 +56,8 @@ class constant {
          */
         var undoCatOpStack = ArrayDeque<catOp>()
         var redoCatOpStack = ArrayDeque<catOp>()
+        var undoItemOpStack = ArrayDeque<itemOp>()
+        var redoItemOpStack = ArrayDeque<itemOp>()
 
         var undoCatName = ""
         var undoCatFav = false
@@ -70,3 +71,4 @@ class constant {
 
 class dbConfig(val url: String, val type: String, val user: String, val password: String)
 class catOp(val opCode: Int, val name: String, val fav: Boolean, val uuid: UUID?)
+class itemOp(val opCode: Int, val toDoInfo: ToDoInfo)
