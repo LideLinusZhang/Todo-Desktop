@@ -290,6 +290,26 @@ class ToDoListView : View("ToDo Content") {
                         constant.undoItemOpStack.push(constant.redoItemOpStack.peek())
                         constant.redoItemOpStack.pop()
                     }
+                } else if (it.code.equals(KeyCode.F3)) {
+                    constant.clipBoard = selectedItem!!
+                } else if (it.code.equals(KeyCode.F4)) {
+                    //records.add(selectionModel.selectedIndex, clipBoard)
+                    val addCmd: String = "./todo-cli-jvm add-item --search-category-by id " +
+                            constant.curCategory + " " + constant.clipBoard.info + " --uuid"
+                    val addRes: String = runCommandSerivce.runCommand(addCmd, File("./bin"))
+                    while (addRes.substring(0, 12) == "An item with") {
+                        println("TDLV: 302")
+                        val tmpRes: String = runCommandSerivce.runCommand("./todo-cli-jvm add-item --search-category-by id " +
+                        constant.curCategory + " Copyof" + constant.clipBoard.info + " --uuid", File("./bin"))
+                        print("tmpRes: ")
+                        println(tmpRes)
+                        if (tmpRes.substring(0, 12) != "An item with") {
+                            getNewestAndAdd(constant.clipBoard.info, selectionModel.selectedIndex)
+                            break
+                        } else {
+                            constant.clipBoard.info = "Copyof" + constant.clipBoard.info
+                        }
+                    }
                 }
             }
         }
@@ -413,6 +433,19 @@ class ToDoListView : View("ToDo Content") {
 
     private fun setDueDate(date : String) {
         listController.convertDate(date)
+    }
+
+    private fun getNewestAndAdd(name: String, index: Int) {
+        var tmpitems = mutableListOf<TodoItemModel>().observable()
+        val tmpItems = deserializeItemList(runCommandSerivce.runCommand(
+            "./todo-cli-jvm list-items " + constant.curCategory + " --json --uuid", File("./bin"))).toObservable()
+        for (i in tmpItems) {
+            if (i.name == name) {
+                val tmpItem: ToDoInfo = ToDoInfo(i.name, i.importance.ordinal, LocalDate.now(), i.favoured, i.uniqueId)
+                records.add(index, tmpItem)
+                break
+            }
+        }
     }
 
 }

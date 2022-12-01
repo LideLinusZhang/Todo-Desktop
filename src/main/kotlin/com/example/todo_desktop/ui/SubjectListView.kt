@@ -61,6 +61,7 @@ class SubjectListView : View("Subject List") {
         }
 
         // Handling undo/redo:
+        /*
         addEventFilter(KeyEvent.KEY_PRESSED) { event: KeyEvent ->
             println("Key pressed")
             val tmpIdx = subjects.size-1
@@ -109,6 +110,8 @@ class SubjectListView : View("Subject List") {
             event.consume()
         }
 
+         */
+
         vbox {
             setPrefSize(15.0, 300.0)
         }
@@ -134,7 +137,8 @@ class SubjectListView : View("Subject List") {
                     // Set current Category to the selected one.
                     println("SubjectListView: print curCategory's value:")
                     constant.curCategory = subjectIDs[doubleClickIdx]
-
+                    print("SLV: ")
+                    println(doubleClickIdx)
                     // First check if the user is clicking the current subject:
                     // Not clicking current branch -->
 
@@ -143,11 +147,10 @@ class SubjectListView : View("Subject List") {
                     println(loadNewItemListCmd)
                     var newItems: String = runCommandSerivce.runCommand(loadNewItemListCmd, File("./bin"))
                     // Delete all tasks in current list.
+                    ToDoListView.records.removeAll(ToDoListView.records)
                     if (newItems.substring(0,2) != "[]") {
                         println("Selected category contains items.")
                         val tmp : MutableList<TodoItemModel> = deserializeItemList(newItems).toObservable()
-                        ToDoListView.records.removeAll(ToDoListView.records)
-
                         // Refill content from database's result
                         for (i in tmp) {
                             //record.add(ToDoInfo(text.value, listController.currPriority, listController.currDueDate))
@@ -172,6 +175,7 @@ class SubjectListView : View("Subject List") {
                     }
                 }
                 setOnKeyPressed {
+                    val tmpIdx = subjects.size-1
                     // Selected + pressing W --> Move subject up by 1
                     if (it.code.equals(KeyCode.W)) {
                         println("W key pressed on subject list")
@@ -190,11 +194,52 @@ class SubjectListView : View("Subject List") {
                     } else if (it.code.equals(KeyCode.S)) {
                         println("S key pressed on subject list")
                         val selectedIdx = selectionModel.selectedIndices[0]
-                        if (selectedIdx != subjects.size-1) {
+                        if (selectedIdx != subjects.size - 1) {
                             val tmpString = subjects[selectedIdx + 1]
                             subjects.add(selectedIdx, tmpString)
                             subjects.removeAt(selectedIdx + 2)
                             println("Item switched down")
+                        }
+                    } else if (it.code.equals(KeyCode.F1)) {
+                        println("F1 pressed")
+                        println("SLV: 69")
+                        if (constant.undoCatOpStack.isNotEmpty()) {
+                            if (constant.undoCatOpStack.peek().opCode == 1) {
+                                subjects.removeAt(tmpIdx)
+                                var delCmd: String = "./todo-cli-jvm delete-category " + subjectIDs[tmpIdx] + " --uuid"
+                                runCommandSerivce.runCommand(delCmd, File("./bin"))
+                                subjectIDs.removeAt(tmpIdx)
+                            } else if (constant.undoCatOpStack.peek().opCode == 2) {
+                                val tmpName = constant.undoCatOpStack.peek().name
+                                subjects.add(tmpName)
+                                var addCmd: String = "./todo-cli-jvm add-category " + tmpName
+                                runCommandSerivce.runCommand(addCmd, File("./bin"))
+                                subjectIDs.add(constant.undoCatOpStack.peek().uuid)
+                                favorites.add(constant.undoCatOpStack.peek().fav)
+                            }
+                            println("SLV: 78")
+                            constant.redoCatOpStack.push(constant.undoCatOpStack.peek())
+                            constant.undoCatOpStack.pop()
+                        }
+
+                    } else if (it.code.equals(KeyCode.F2)) {
+                        println("F2 pressed")
+                        if (constant.redoCatOpStack.isNotEmpty()) {
+                            val redoOpCode = constant.redoCatOpStack.peek().opCode
+                            if (redoOpCode == 1) {
+                                subjects.add(constant.redoCatOpStack.peek().name)
+                                subjectIDs.add(constant.redoCatOpStack.peek().uuid)
+                                val addCmd: String = "./todo-cli-jvm add-category " + constant.redoCatOpStack.peek().name
+                                runCommandSerivce.runCommand(addCmd, File("./bin"))
+                            } else if (redoOpCode == 2) {
+                                var delIdx = subjectIDs.indexOf(constant.redoCatOpStack.peek().uuid)
+                                var delCmd: String = "./todo-cli-jvm delete-category " + constant.redoCatOpStack.peek().uuid
+                                subjects.removeAt(delIdx)
+                                subjectIDs.removeAt(delIdx)
+                                favorites.removeAt(delIdx)
+                            }
+                            constant.undoCatOpStack.push(constant.redoCatOpStack.peek())
+                            constant.redoCatOpStack.pop()
                         }
                     }
                 }
@@ -289,8 +334,5 @@ class SubjectListView : View("Subject List") {
         vbox {
             setPrefSize(15.0, 700.0)
         }
-
-
     }
-    // Some sample data
 }

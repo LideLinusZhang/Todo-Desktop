@@ -2,6 +2,7 @@ package com.example.todo_desktop.common
 import com.example.todo_desktop.data.ToDoInfo
 import com.example.todo_desktop.service.RunCommandService
 import tornadofx.*
+import java.time.LocalDate
 import java.util.*
 
 class constant {
@@ -66,6 +67,8 @@ class constant {
 
         var undoTodoItem = ToDoInfo("", 3, date = null, false, UUID.randomUUID())
         var redoTodoItem = ToDoInfo("", 3, date = null, false, UUID.randomUUID())
+
+        var clipBoard: ToDoInfo = ToDoInfo("place holder", 3, LocalDate.now(), false, UUID.randomUUID())
     }
 }
 
