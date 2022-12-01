@@ -39,6 +39,19 @@ class ToDoListView : View("ToDo Content") {
     // This might need to be global
     companion object {
         val records = mutableListOf<ToDoInfo>().observable()
+        fun getNewestAndAdd(name: String, index: Int) {
+            var tmpitems = mutableListOf<TodoItemModel>().observable()
+            val runCommandService : RunCommandService = RunCommandService()
+            val tmpItems = deserializeItemList(runCommandService.runCommand(
+                "./todo-cli-jvm list-items " + constant.curCategory + " --json --uuid", File("./bin"))).toObservable()
+            for (i in tmpItems) {
+                if (i.name == name) {
+                    val tmpItem: ToDoInfo = ToDoInfo(i.name, i.importance.ordinal, LocalDate.now(), i.favoured, i.uniqueId)
+                    records.add(index, tmpItem)
+                    break
+                }
+            }
+        }
     }
 
     private val DueDateList = FXCollections.observableArrayList("Today", "Tomorrow", "Pick a date")
@@ -434,8 +447,7 @@ class ToDoListView : View("ToDo Content") {
     private fun setDueDate(date : String) {
         listController.convertDate(date)
     }
-
-    private fun getNewestAndAdd(name: String, index: Int) {
+    /*fun getNewestAndAdd(name: String, index: Int) {
         var tmpitems = mutableListOf<TodoItemModel>().observable()
         val tmpItems = deserializeItemList(runCommandSerivce.runCommand(
             "./todo-cli-jvm list-items " + constant.curCategory + " --json --uuid", File("./bin"))).toObservable()
@@ -447,5 +459,7 @@ class ToDoListView : View("ToDo Content") {
             }
         }
     }
+
+     */
 
 }
