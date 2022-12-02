@@ -41,6 +41,7 @@ class SubjectListView : View("Subject List") {
 
     override val root = hbox {
         // Execute command for listing out all current categories.
+        runCommandSerivce.syncFromServer()
         var s1: String = runCommandSerivce.runCommand("./todo-cli-jvm list-categories --json", File("./bin"))
         // Debugging print message
         println(s1)

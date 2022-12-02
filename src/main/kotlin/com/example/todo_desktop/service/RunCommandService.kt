@@ -27,4 +27,8 @@ class RunCommandService {
         proc.waitFor(10, TimeUnit.SECONDS)
         return proc.inputStream.bufferedReader().readText()
     }
+
+    fun syncFromServer() {
+        runCommand("./todo-cli-jvm sync-from-server", File("./bin"))
+    }
 }

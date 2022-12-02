@@ -201,8 +201,10 @@ class ToDoListView : View("ToDo Content") {
                                     println(records[rmIdx].info)
                                     var delCmd: String = "./todo-cli-jvm delete-item " + records[rmIdx].uniqueID + " --uuid"
                                     println(delCmd)
+                                    reload()
+                                    selectionModel.select(rmIdx)
                                     runCommandSerivce.runCommand(delCmd, File("./bin"))
-
+                                    println("TDLV: line206")
                                     constant.undoItemOpStack.push(selectedItem?.let { it1 -> itemOp(2, it1) })
                                     deleteTodo(records, selectedItem)
                                 }
@@ -418,6 +420,7 @@ class ToDoListView : View("ToDo Content") {
         var tmpCmd: String = "./todo-cli-jvm add-item --search-category-by id " + constant.curCategory +  " "
         tmpCmd = tmpCmd + text.value + " --uuid"
         println(tmpCmd)
+        reload()
         runCommandSerivce.runCommand(tmpCmd, File("./bin"))
 
         // Query the database to obtain the last (most recent) item of current category.
@@ -447,19 +450,34 @@ class ToDoListView : View("ToDo Content") {
     private fun setDueDate(date : String) {
         listController.convertDate(date)
     }
-    /*fun getNewestAndAdd(name: String, index: Int) {
-        var tmpitems = mutableListOf<TodoItemModel>().observable()
-        val tmpItems = deserializeItemList(runCommandSerivce.runCommand(
-            "./todo-cli-jvm list-items " + constant.curCategory + " --json --uuid", File("./bin"))).toObservable()
-        for (i in tmpItems) {
-            if (i.name == name) {
-                val tmpItem: ToDoInfo = ToDoInfo(i.name, i.importance.ordinal, LocalDate.now(), i.favoured, i.uniqueId)
-                records.add(index, tmpItem)
-                break
+
+    private fun reload() {
+        var loadNewItemListCmd: String = "./todo-cli-jvm list-items " + constant.curCategory + " --json --uuid"
+        println(loadNewItemListCmd)
+        runCommandSerivce.syncFromServer()
+        var newItems: String = runCommandSerivce.runCommand(loadNewItemListCmd, File("./bin"))
+        // Delete all tasks in current list.
+        records.removeAll(ToDoListView.records)
+        if (newItems.substring(0,2) != "[]") {
+            println("Selected category contains items.")
+            val tmp : MutableList<TodoItemModel> = deserializeItemList(newItems).toObservable()
+            // Refill content from database's result
+            for (i in tmp) {
+                val mYear: Number? = i.deadline?.year
+                val mMonth: Number? = i.deadline?.monthNumber
+                val mDay: Number? = i.deadline?.dayOfMonth
+                if (mYear == null || mMonth == null || mDay == null) {
+                    records.add(ToDoInfo(i.name, i.importance.ordinal, null, false, i.uniqueId))
+                    println(i.uniqueId)
+                } else {
+                    val mYearInt = mYear.toInt()
+                    val mMonthInt = mMonth.toInt()
+                    val mDayInt = mDay.toInt()
+                    records.add(ToDoInfo(i.name, i.importance.ordinal,
+                        LocalDate.of(mYearInt, mMonthInt, mDayInt), false, i.uniqueId))
+                    println(i.uniqueId)
+                }
             }
         }
     }
-
-     */
-
 }
