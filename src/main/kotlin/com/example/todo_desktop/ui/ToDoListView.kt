@@ -44,8 +44,10 @@ class ToDoListView : View("ToDo Content") {
             val runCommandService : RunCommandService = RunCommandService()
             val tmpItems = deserializeItemList(runCommandService.runCommand(
                 "./todo-cli-jvm list-items " + constant.curCategory + " --json --uuid", File("./bin"))).toObservable()
+            println("******")
             for (i in tmpItems) {
                 if (i.name == name) {
+                    print("--------")
                     val tmpItem: ToDoInfo = ToDoInfo(i.name, i.importance.ordinal, LocalDate.now(), i.favoured, i.uniqueId)
                     records.add(index, tmpItem)
                     break
@@ -325,6 +327,8 @@ class ToDoListView : View("ToDo Content") {
                             constant.clipBoard.info = "Copyof" + constant.clipBoard.info
                         }
                     }
+                } else if (it.code.equals(KeyCode.F5)) {
+                    reload()
                 }
             }
         }

@@ -144,7 +144,7 @@ class SubjectListView : View("Subject List") {
                     // Not clicking current branch -->
 
                     // Call CLI & search for tasks (with selectedItem as parameter)
-                    var loadNewItemListCmd: String = "./todo-cli-jvm list-items " + subjectIDs[doubleClickIdx].toString() + " --json --uuid"
+                    var loadNewItemListCmd: String = "./todo-cli-jvm list-items " + constant.curCategory + " --json --uuid"
                     println(loadNewItemListCmd)
                     var newItems: String = runCommandSerivce.runCommand(loadNewItemListCmd, File("./bin"))
                     // Delete all tasks in current list.
