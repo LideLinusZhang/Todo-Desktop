@@ -9,6 +9,7 @@ import javafx.scene.input.KeyEvent
 import javafx.scene.layout.BorderPane
 import tornadofx.*
 import java.io.File
+import java.nio.file.Paths
 import javax.swing.text.html.ListView
 
 
@@ -70,14 +71,14 @@ class MainView: View() {
                             }
                         }
                         hbox {
-                            setPrefSize(400.0, 50.0)
+                            setPrefSize(20.0, 50.0)
                             alignment = CENTER
                             button("Login") {
                                 setPrefSize(100.0, 30.0)
                                 action {
                                     serverConfigUpdateService.updateCredential(userID, password)
                                     if (attemptSync()) {
-                                        title = "Anywhere ToDo"
+                                        title = "Anywhere Todo"
                                         root.top = headerView.root
                                         root.center = myList.root
                                         root.left = subjectList.root
